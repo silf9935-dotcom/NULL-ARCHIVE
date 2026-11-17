@@ -21,14 +21,14 @@ This repository is being built in staged, testable milestones. The initial commi
 
 ## Build
 ```bash
-./gradlew build
+gradle build
 ```
 On Windows:
 ```bat
-gradlew.bat build
+gradle build
 ```
 
-The distributable JAR is written to `build/libs/`.
+The distributable JAR is written to `build/libs/`. A Gradle wrapper will be added after the first CI-validated build; until then, run `gradle build` with Gradle 8.8 installed.
 
 ## Project layout
 - `src/main/java` — mod code
