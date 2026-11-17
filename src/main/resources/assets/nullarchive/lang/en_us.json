@@ -1,0 +1,23 @@
+{
+  "itemGroup.nullarchive": "NULL ARCHIVE",
+  "block.nullarchive.archive_concrete": "Archive Concrete",
+  "block.nullarchive.archive_tile": "Archive Tile",
+  "block.nullarchive.black_glass": "Black Glass",
+  "block.nullarchive.corrupted_stone": "Corrupted Stone",
+  "block.nullarchive.null_block": "Null Block",
+  "block.nullarchive.static_block": "Static Block",
+  "block.nullarchive.memory_block": "Memory Block",
+  "block.nullarchive.rift_frame": "Rift Frame",
+  "block.nullarchive.sealed_door": "Sealed Door",
+  "block.nullarchive.observation_glass": "Observation Glass",
+  "item.nullarchive.field_recorder": "Field Recorder",
+  "item.nullarchive.emf_reader": "EMF Reader",
+  "item.nullarchive.evidence_tape": "Evidence Tape",
+  "item.nullarchive.damaged_photograph": "Damaged Photograph",
+  "item.nullarchive.archive_key": "Archive Key",
+  "item.nullarchive.rift_key": "Rift Key",
+  "item.nullarchive.terminal_cartridge": "Terminal Cartridge",
+  "item.nullarchive.memory_fragment": "Memory Fragment",
+  "item.nullarchive.null_shard": "Null Shard",
+  "item.nullarchive.sealed_document": "Sealed Document"
+}
