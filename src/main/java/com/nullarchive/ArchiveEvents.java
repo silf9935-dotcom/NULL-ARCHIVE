@@ -66,7 +66,8 @@ public final class ArchiveEvents {
             event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Archive limit reached."), false);
             return;
         }
-        data.putInt(EVIDENCE_KEY, evidence + 1);\n        stack.shrink(1);
+        data.putInt(EVIDENCE_KEY, evidence + 1);
+        stack.shrink(1);
         event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Fragment catalogued: " + (evidence + 1) + "/5"), false);
         event.getLevel().playSound(null, event.getEntity().blockPosition(),
                 ModSounds.ARCHIVE_PULSE.get(), SoundSource.PLAYERS, 0.65F, 1.0F);
