@@ -160,4 +160,26 @@ public final class ArchiveEvents {
         event.getLevel().playSound(null, event.getEntity().blockPosition(),
                 ModSounds.SIGNAL_DISTORTION.get(), SoundSource.PLAYERS, 0.6F, phase < 4 ? 1.4F : 0.5F);
     }
+    @SubscribeEvent
+    public static void onKeyAndCartridgeUse(PlayerInteractEvent.RightClickItem event) {
+        if (event.getLevel().isClientSide()) return;
+        var stack = event.getItemStack();
+        String response;
+        if (stack.is(ModItems.ARCHIVE_KEY.get())) {
+            response = event.getEntity().getPersistentData().getInt(PHASE_KEY) < 3
+                    ? "ARCHIVE KEY // The teeth are worn smooth. It fits a lock you have not found."
+                    : "ARCHIVE KEY // A lock clicks somewhere below the archive.";
+        } else if (stack.is(ModItems.RIFT_KEY.get())) {
+            response = event.getEntity().getPersistentData().getInt(PHASE_KEY) < 5
+                    ? "RIFT KEY // It is vibrating. The breach is not ready."
+                    : "RIFT KEY // The metal bends toward the rift. Do not turn it.";
+        } else if (stack.is(ModItems.TERMINAL_CARTRIDGE.get())) {
+            response = event.getEntity().getPersistentData().getInt(EVIDENCE_KEY) < 2
+                    ? "CARTRIDGE // DATA CORRUPTED. More evidence required."
+                    : "CARTRIDGE // Recovered directory: /SUBJECT/NULL/EXIT_LOG.txt";
+        } else return;
+        event.getEntity().displayClientMessage(Component.literal(response), false);
+        event.getLevel().playSound(null, event.getEntity().blockPosition(), ModSounds.TAPE_CLICK.get(),
+                SoundSource.PLAYERS, 0.6F, stack.is(ModItems.RIFT_KEY.get()) ? 0.55F : 1.0F);
+    }
 }
