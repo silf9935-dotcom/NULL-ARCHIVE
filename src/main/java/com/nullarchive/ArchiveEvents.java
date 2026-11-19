@@ -144,4 +144,19 @@ public final class ArchiveEvents {
         event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(),
                 SoundSource.BLOCKS, 0.8F, 0.75F + anomaly * 0.1F);
     }
+    @SubscribeEvent
+    public static void onNullShardUse(PlayerInteractEvent.RightClickItem event) {
+        if (event.getLevel().isClientSide() || !event.getItemStack().is(ModItems.NULL_SHARD.get())) return;
+        CompoundTag data = event.getEntity().getPersistentData();
+        int phase = data.getInt(PHASE_KEY);
+        int evidence = data.getInt(EVIDENCE_KEY);
+        String response = phase < 4
+                ? "NULL SHARD // Cold. It refuses to resonate before the incident."
+                : evidence < 3
+                ? "NULL SHARD // It vibrates toward missing evidence."
+                : "NULL SHARD // The shard is silent. Something nearby is listening.";
+        event.getEntity().displayClientMessage(Component.literal(response), false);
+        event.getLevel().playSound(null, event.getEntity().blockPosition(),
+                ModSounds.SIGNAL_DISTORTION.get(), SoundSource.PLAYERS, 0.6F, phase < 4 ? 1.4F : 0.5F);
+    }
 }
