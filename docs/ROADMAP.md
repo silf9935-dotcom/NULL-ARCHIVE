@@ -4,35 +4,45 @@
 - [x] Forge 1.21.1 / Java 21 project layout
 - [x] Mod entrypoint and deferred registries
 - [x] Initial block, item, and creative-tab registrations
-- [ ] Validate with a real Gradle build and Forge client launch
+- [x] JSON blockstates and model files for initial content
+- [x] GitHub Actions build workflow
 - [ ] Add Gradle wrapper
+- [ ] Confirm Forge client launch and in-game registration
 
 ## Milestone 2 — World and atmosphere
-- [ ] Custom structures and world placement
+- [ ] Custom archive structure and placement
 - [ ] Spatial rift behavior and safe dimension transition
-- [ ] Ambient soundscape and resource assets
+- [ ] Custom texture and sound assets
 - [ ] Environmental anomaly controller
+- [x] Sound event registry prototype
 
 ## Milestone 3 — Evidence and ARG
-- [ ] Recorder / evidence items
-- [ ] Terminal interface and data fragments
-- [ ] Persistent player investigation state
-- [ ] Six-phase progression graph
+- [x] Field recorder with six narrative messages
+- [x] Evidence index prototype (five fragments)
+- [x] Phase-gated tape playback
+- [x] Memory terminal interaction
+- [x] EMF reader with phase-sensitive readings
+- [x] Sealed access and rift monitor interactions
+- [ ] Journal UI and evidence-specific clues
+- [ ] Persistent progression graph and quest objectives
 
 ## Milestone 4 — Horror systems
 - [ ] Sanity / anomaly pressure model
 - [ ] Hallucination events with accessibility controls
 - [ ] Client-side visual distortion effects
 - [ ] Audio cues and entity encounters
+- [ ] Escalating anomaly schedule
 
 ## Milestone 5 — Content and polish
 - [ ] Complete localization
-- [ ] Models, blockstates, textures, and sounds
+- [ ] Original textures, models, blockstates, and sound assets
 - [ ] In-game tutorial and journal
 - [ ] Balance a full ~2-hour playthrough
+- [ ] Endings and replayability
 
 ## Engineering rules
 - Keep the project on Forge, not NeoForge.
 - Keep gameplay progression deterministic where possible; randomness may affect presentation, not critical evidence.
 - Never make a required clue permanently missable.
 - All client-only rendering code must be isolated from dedicated-server loading.
+- Server-side events own progression changes.
