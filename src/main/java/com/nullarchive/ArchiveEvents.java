@@ -15,6 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class ArchiveEvents {
     private static final String PHASE_KEY = "nullarchive_phase";
     private static final String EVIDENCE_KEY = "nullarchive_evidence";
+    private static final String ANOMALY_KEY = "nullarchive_anomaly";
 
     private static final String[] PHASE_MESSAGES = {
             "TAPE 01 // INTAKE: The lights are on. Nobody signed the visitor log.",
@@ -119,5 +120,28 @@ public final class ArchiveEvents {
             if (phase >= 5) event.getLevel().playSound(null, event.getPos(),
                     ModSounds.SIGNAL_DISTORTION.get(), SoundSource.BLOCKS, 1.0F, 0.5F);
         }
+    }
+    @SubscribeEvent
+    public static void onAnomalyBlockUse(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getLevel().isClientSide()) return;
+        var block = event.getLevel().getBlockState(event.getPos()).getBlock();
+        if (!block.equals(ModBlocks.STATIC_BLOCK.get()) && !block.equals(ModBlocks.NULL_BLOCK.get())
+                && !block.equals(ModBlocks.CORRUPTED_STONE.get())) return;
+
+        CompoundTag data = event.getEntity().getPersistentData();
+        if (data.getInt(PHASE_KEY) < 2) {
+            event.getEntity().displayClientMessage(Component.literal("ANOMALY // Dormant. Complete the first recording."), false);
+            return;
+        }
+        int anomaly = Math.min(data.getInt(ANOMALY_KEY) + 1, 3);
+        data.putInt(ANOMALY_KEY, anomaly);
+        String message = switch (anomaly) {
+            case 1 -> "ANOMALY 01 // The surface is warm. It has no source of heat.";
+            case 2 -> "ANOMALY 02 // Your shadow is facing the wrong direction.";
+            default -> "ANOMALY 03 // Something is using your name from inside the wall.";
+        };
+        event.getEntity().displayClientMessage(Component.literal(message), false);
+        event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(),
+                SoundSource.BLOCKS, 0.8F, 0.75F + anomaly * 0.1F);
     }
 }
