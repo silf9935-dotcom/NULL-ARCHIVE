@@ -114,12 +114,30 @@ public final class ArchiveEvents {
                         SoundSource.BLOCKS, 1.0F, 0.6F);
             }
         } else if (block.equals(ModBlocks.RIFT_FRAME.get())) {
-            String output = phase < 5
-                    ? "RIFT MONITOR // No breach detected. Keep the recorder active."
-                    : "RIFT MONITOR // BREACH CONFIRMED. The other side is transmitting your location.";
-            event.getEntity().displayClientMessage(Component.literal(output), false);
-            if (phase >= 5) event.getLevel().playSound(null, event.getPos(),
-                    ModSounds.SIGNAL_DISTORTION.get(), SoundSource.BLOCKS, 1.0F, 0.5F);
+            var held = event.getItemStack();
+            if (held.is(ModItems.RIFT_KEY.get())) {
+                if (data.getBoolean("nullarchive_ending_complete")) {
+                    event.getEntity().displayClientMessage(Component.literal("NULL ARCHIVE // The breach is sealed. There is nothing left to unlock."), false);
+                } else if (phase < 6 || evidence < 5) {
+                    event.getEntity().displayClientMessage(Component.literal(
+                            "RIFT LOCK // Final tape and all five evidence fragments required. Progress: " + phase + "/6 // Evidence: " + evidence + "/5"), false);
+                } else {
+                    data.putBoolean("nullarchive_ending_complete", true);
+                    if (!event.getEntity().getAbilities().instabuild) held.shrink(1);
+                    event.getEntity().displayClientMessage(Component.literal(
+                            "ENDING // The key turns without touching the lock. The rift folds inward. On the other side, someone finishes your sentence. ARCHIVE CLOSED."), false);
+                    event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(),
+                            SoundSource.BLOCKS, 1.2F, 0.35F);
+                    event.setCanceled(true);
+                }
+            } else {
+                String output = phase < 5
+                        ? "RIFT MONITOR // No breach detected. Keep the recorder active."
+                        : "RIFT MONITOR // BREACH CONFIRMED. The other side is transmitting your location.";
+                event.getEntity().displayClientMessage(Component.literal(output), false);
+                if (phase >= 5) event.getLevel().playSound(null, event.getPos(),
+                        ModSounds.SIGNAL_DISTORTION.get(), SoundSource.BLOCKS, 1.0F, 0.5F);
+            }
         }
     }
     @SubscribeEvent
