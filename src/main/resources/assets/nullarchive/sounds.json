@@ -1,0 +1,5 @@
+{
+  "archive_pulse": { "sounds": [ "minecraft:block.amethyst_block.chime" ] },
+  "signal_distortion": { "sounds": [ "minecraft:block.note_block.bit" ] },
+  "tape_click": { "sounds": [ "minecraft:item.spyglass.use" ] }
+}
