@@ -28,7 +28,7 @@ public final class ArchiveEvents {
     private static final String ANOMALY_KEY = "nullarchive_anomaly";
     private static final String EVIDENCE_FLAGS_KEY = "nullarchive_evidence_flags";
     private static final int EVIDENCE_TAPE_FLAG = 1, PHOTO_FLAG = 2, MEMORY_FLAG = 4, DOCUMENT_FLAG = 8;
-    private static final int GLASS_FLAG = 16, TERMINAL_FLAG = 32, DOOR_FLAG = 64;
+    private static final int GLASS_FLAG = 16, TERMINAL_FLAG = 32, DOOR_FLAG = 64, HIDDEN_FLAG = 128;
 
     private static int evidenceCount(CompoundTag data) {
         int flags = data.getInt(EVIDENCE_FLAGS_KEY);
@@ -70,7 +70,7 @@ public final class ArchiveEvents {
                     Player player = context.getSource().getPlayerOrException();
                     CompoundTag data = player.getPersistentData();
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Phase " + data.getInt(PHASE_KEY)
-                            + "/6 // Evidence " + evidenceCount(data) + "/7 // Anomaly " + data.getInt(ANOMALY_KEY)
+                            + "/6 // Evidence " + evidenceCount(data) + "/8 // Anomaly " + data.getInt(ANOMALY_KEY)
                             + " // Ending " + (data.getBoolean("nullarchive_ending_complete") ? "COMPLETE" : "INCOMPLETE")), false);
                     return 1;
                 }))
@@ -104,6 +104,8 @@ public final class ArchiveEvents {
                     data.remove(ANOMALY_KEY);
                     data.remove("nullarchive_ending_complete");
                     data.remove("nullarchive_door_unlocked");
+                    data.remove("nullarchive_rift_scan");
+                    data.remove("nullarchive_hidden_record");
                     data.remove("nullarchive_facility_x");
                     data.remove("nullarchive_facility_y");
                     data.remove("nullarchive_facility_z");
@@ -392,7 +394,7 @@ public final class ArchiveEvents {
             return;
         }
         stack.shrink(1);
-        event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Unique fragment catalogued: " + evidenceCount(data) + "/7"), false);
+        event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Unique fragment catalogued: " + evidenceCount(data) + "/8"), false);
         event.getLevel().playSound(null, event.getEntity().blockPosition(),
                 ModSounds.ARCHIVE_PULSE.get(), SoundSource.PLAYERS, 0.65F, 1.0F);
     }
@@ -493,7 +495,7 @@ public final class ArchiveEvents {
                     event.getEntity().displayClientMessage(Component.literal("NULL ARCHIVE // The breach is sealed. There is nothing left to unlock."), false);
                 } else if (phase < 6 || evidence < 5) {
                     event.getEntity().displayClientMessage(Component.literal(
-                            "RIFT LOCK // Final tape and at least five of seven clues required. Progress: " + phase + "/6 // Evidence: " + evidence + "/7"), false);
+                            "RIFT LOCK // Final tape and at least five of eight clues required. Progress: " + phase + "/6 // Evidence: " + evidence + "/8"), false);
                 } else {
                     data.putBoolean("nullarchive_ending_complete", true);
                     if (!event.getEntity().getAbilities().instabuild) held.shrink(1);
@@ -512,7 +514,23 @@ public final class ArchiveEvents {
                         ModSounds.SIGNAL_DISTORTION.get(), SoundSource.BLOCKS, 1.0F, 0.5F);
             }
         } else if (block.equals(ModBlocks.ARCHIVE_TILE.get())) {
-            if (phase > 0) {
+            boolean atRecordsSecret = data.contains("nullarchive_facility_x")
+                    && data.getString("nullarchive_facility_dimension").equals(event.getLevel().dimension().location().toString())
+                    && event.getPos().equals(new BlockPos(data.getInt("nullarchive_facility_x") + 49,
+                            data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z") + 2));
+            if (atRecordsSecret && phase >= 4 && evidence >= 2 && !data.getBoolean("nullarchive_hidden_record")) {
+                data.putBoolean("nullarchive_hidden_record", true);
+                boolean first = catalogueEvidence(data, HIDDEN_FLAG);
+                event.getEntity().displayClientMessage(Component.literal(first
+                        ? "HIDDEN RECORD // EVIDENCE 08 indexed. The shelf labels are dates. Every date is your next visit."
+                        : "HIDDEN RECORD // The archive has already indexed this note."), false);
+                event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(),
+                        SoundSource.BLOCKS, 0.7F, 0.4F);
+            } else if (atRecordsSecret && phase < 4) {
+                event.getEntity().displayClientMessage(Component.literal("RECORDS // The shelf labels are blank. Incident authorization required."), false);
+            } else if (atRecordsSecret && evidence < 2) {
+                event.getEntity().displayClientMessage(Component.literal("RECORDS // A hidden index is detectable, but the archive needs two catalogued clues."), false);
+            } else if (phase > 0) {
                 String inscriptionKey = "nullarchive_inscription_" + phase;
                 if (!data.getBoolean(inscriptionKey)) {
                     String inscription = switch (phase) {
