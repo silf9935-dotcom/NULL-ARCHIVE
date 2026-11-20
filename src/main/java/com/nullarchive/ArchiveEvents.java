@@ -27,7 +27,15 @@ public final class ArchiveEvents {
 
     private static boolean catalogueEvidence(CompoundTag data, int flag) {
         int flags = data.getInt(EVIDENCE_FLAGS_KEY);
-        if ((flags & flag) != 0) return false;
+        if (flags == 0) {
+            int legacy = Math.min(data.getInt(EVIDENCE_KEY), 5);
+            if (legacy > 0) flags = (1 << legacy) - 1;
+        }
+        if ((flags & flag) != 0) {
+            data.putInt(EVIDENCE_FLAGS_KEY, flags);
+            data.putInt(EVIDENCE_KEY, Integer.bitCount(flags));
+            return false;
+        }
         data.putInt(EVIDENCE_FLAGS_KEY, flags | flag);
         data.putInt(EVIDENCE_KEY, evidenceCount(data));
         return true;
