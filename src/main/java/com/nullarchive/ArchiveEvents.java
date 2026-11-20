@@ -125,6 +125,10 @@ public final class ArchiveEvents {
                     level.setBlock(origin.offset(sx + 10, y, 4), air, 3);
                 }
                 for (int x = 8; x <= 10; x++) level.setBlock(origin.offset(sx + x, 0, 4), tile, 3);
+                // Clear the next room's west wall so the spine remains connected.
+                int nextStart = sx + 11;
+                for (int y = 1; y <= 3; y++)
+                    level.setBlock(origin.offset(nextStart, y, 4), air, 3);
             }
         }
         level.setBlock(origin.offset(4, 1, 4), memory, 3);
