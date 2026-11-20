@@ -1,6 +1,7 @@
 package com.nullarchive.registry;
 
 import com.nullarchive.NullArchive;
+import com.nullarchive.block.ArchiveDoorBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -23,7 +24,7 @@ public final class ModBlocks {
     public static final RegistryObject<Block> STATIC_BLOCK = register("static_block", 1.5F, 3.0F);
     public static final RegistryObject<Block> MEMORY_BLOCK = register("memory_block", 2.0F, 5.0F);
     public static final RegistryObject<Block> RIFT_FRAME = register("rift_frame", 4.0F, 12.0F);
-    public static final RegistryObject<Block> SEALED_DOOR = register("sealed_door", 4.0F, 8.0F);
+    public static final RegistryObject<ArchiveDoorBlock> SEALED_DOOR = BLOCKS.register("sealed_door", () -> new ArchiveDoorBlock(BlockBehaviour.Properties.of().strength(4.0F, 8.0F).sound(SoundType.STONE)));
     public static final RegistryObject<Block> OBSERVATION_GLASS = register("observation_glass", 0.3F, 0.3F);
 
     private static RegistryObject<Block> register(String name, float hardness, float resistance) {
