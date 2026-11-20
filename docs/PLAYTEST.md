@@ -15,11 +15,11 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 
 ## Admin test commands
 
-- `/nullarchive generate` — builds a compact seven-room facility around the player's position (permission level 2). Run in an open area; the generator replaces blocks within its footprint. It is a command-built prototype, not automatic world generation. Start in Intake and follow the corridor.
+- `/nullarchive generate` — builds a compact seven-room facility around the player (permission level 2). Run in an open area; it replaces blocks in its footprint and drops curated progression items. It is a command-built prototype, not automatic world generation. Start in Intake and follow the corridor.
 - `/nullarchive status` — shows tape phase, evidence count, anomaly count, and ending state (permission level 2).
 - `/nullarchive reset` — resets player progression for a fresh test. It does not reset world blocks or the door's physical state.
 
-## Known limitations
+- The generator places Field Recorder, EMF Reader, evidence items, Terminal Cartridge, Archive Key, Rift Key, and Null Shard as item drops at room landmarks. Running the command again duplicates these drops.\n\n## Known limitations
 
 - Progress and evidence are stored in player persistent data; there is no reset/journal UI yet.
 - Evidence is now tracked by distinct item/clue flags: four evidence item types plus Observation Glass, Memory Block, and Sealed Door clues. The Rift ending still requires five distinct clues; duplicates cannot be farmed.
