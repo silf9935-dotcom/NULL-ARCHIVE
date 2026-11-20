@@ -446,12 +446,36 @@ public final class ArchiveEvents {
                     SoundSource.PLAYERS, 0.5F, 0.9F);
             return;
         }
+        BlockPos scanOrigin = player.blockPosition();
+        // Detect actual anomalous blocks as well as authored landmarks, so mutations remain discoverable.
+        if (phase >= 2) {
+            for (int dx = -8; dx <= 8; dx++) for (int dy = -8; dy <= 8; dy++) for (int dz = -8; dz <= 8; dz++) {
+                BlockPos scanPos = scanOrigin.offset(dx, dy, dz);
+                double distance = scanOrigin.distSqr(scanPos);
+                if (distance > 64 || distance >= bestDistance) continue;
+                var scannedBlock = event.getLevel().getBlockState(scanPos).getBlock();
+                if (scannedBlock.equals(ModBlocks.NULL_BLOCK.get())) {
+                    bestDistance = distance; bestIndex = 7;
+                } else if (scannedBlock.equals(ModBlocks.STATIC_BLOCK.get())) {
+                    bestDistance = distance; bestIndex = 3;
+                } else if (scannedBlock.equals(ModBlocks.CORRUPTED_STONE.get())) {
+                    bestDistance = distance; bestIndex = 2;
+                } else if (scannedBlock.equals(ModBlocks.BLACK_GLASS.get())) {
+                    bestDistance = distance; bestIndex = 1;
+                }
+            }
+        }
         int strength = bestDistance <= 4 ? 5 : bestDistance <= 9 ? 4 : bestDistance <= 16 ? 3 : bestDistance <= 36 ? 2 : 1;
-        String direction = targets[bestIndex].getX() > player.blockPosition().getX() ? "ahead"
-                : targets[bestIndex].getX() < player.blockPosition().getX() ? "behind" : "nearby";
+        BlockPos target = bestIndex == 7 ? scanOrigin : targets[bestIndex];
+        String direction = target.getX() > scanOrigin.getX() ? "ahead"
+                : target.getX() < scanOrigin.getX() ? "behind"
+                : target.getY() > scanOrigin.getY() ? "above"
+                : target.getY() < scanOrigin.getY() ? "below"
+                : target.getZ() > scanOrigin.getZ() ? "to your right"
+                : target.getZ() < scanOrigin.getZ() ? "to your left" : "underfoot";
         player.displayClientMessage(Component.literal("EMF // " + strength + "/5 // " + labels[bestIndex]
                 + " Direction: " + direction + ". Signal does not catalogue evidence."), false);
-        event.getLevel().playSound(null, player.blockPosition(),
+        event.getLevel().playSound(null, scanOrigin,
                 strength >= 4 || phase >= 5 ? ModSounds.SIGNAL_DISTORTION.get() : ModSounds.ARCHIVE_PULSE.get(),
                 SoundSource.PLAYERS, 0.65F, 0.55F + strength * 0.12F);
     }
