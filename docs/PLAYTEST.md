@@ -10,10 +10,10 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 4. Use the recorder again. Later tapes require evidence.
 5. Right-click Observation Glass after tape 2 to record a clue. Right-click Memory Block after tape 2 to inspect the terminal; the query is locked without a cartridge. With at least two indexed clues, use a Terminal Cartridge on Memory Block to query `/SUBJECT/NULL/EXIT_LOG.txt` and record the terminal clue; the cartridge is consumed outside creative.
 6. After tape 4 and three clues, use Archive Key on Sealed Door for the first unlock (consumed outside creative), then right-click to open/close it physically. The first access also catalogues the seal clue. Before the gate, it reports denied access.
-7. Right-click Static Block, Null Block, or Corrupted Stone after the second tape to trigger escalating anomaly messages. Right-click Archive Tile or Archive Concrete once per tape phase to discover phase-specific inscriptions; each phase's inscription is shown only once per player.
-8. Right-click the EMF Reader, Null Shard, Archive Key, Rift Key, and Terminal Cartridge to hear their current prototype responses.
-9. After generating the facility, proximity events trigger in Observation, Basement, Incident Lab, Sealed Wing, and Rift Chamber as you advance phases. Each event is once per generated layout.
-10. At phase 5 or later, right-click the Rift Frame once for a one-time resonance scan; it adds narrative feedback but does not count as evidence. For the ending: play all six tapes, catalogue at least five distinct clues out of seven, then right-click the Rift Frame while holding the Rift Key. In creative mode the key is not consumed.
+7. In the Records room (room 5), after tape 4 and at least two indexed clues, right-click the floor tile at the hidden shelf position to discover a one-time hidden record (clue 8).\n8. Right-click Static Block, Null Block, or Corrupted Stone after the second tape to trigger escalating anomaly messages. Right-click Archive Tile or Archive Concrete once per tape phase to discover phase-specific inscriptions; each phase's inscription is shown only once per player.
+9. Right-click the EMF Reader, Null Shard, Archive Key, Rift Key, and Terminal Cartridge to hear their current prototype responses.
+10. After generating the facility, proximity events trigger in Observation, Basement, Incident Lab, Sealed Wing, and Rift Chamber as you advance phases. Each event is once per generated layout.
+11. At phase 5 or later, right-click the Rift Frame once for a one-time resonance scan; it adds narrative feedback but does not count as evidence. For the ending: play all six tapes, catalogue at least five distinct clues out of eight, then right-click the Rift Frame while holding the Rift Key. In creative mode the key is not consumed.
 
 ## Admin test commands
 
@@ -26,7 +26,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 ## Known limitations
 
 - Progress and evidence are stored in player persistent data; there is no reset/journal UI yet.
-- Evidence is now tracked by distinct item/clue flags: four evidence item types plus Observation Glass, Memory Block, and Sealed Door clues. The Rift ending still requires five distinct clues; duplicates cannot be farmed.
+- Evidence is now tracked by distinct item/clue flags: four evidence item types plus Observation Glass, Memory Block, Sealed Door, and the hidden Records room clues. The Rift ending still requires five distinct clues; duplicates cannot be farmed.
 - Sealed Door now has a persistent open/closed state and changes collision so the player can pass; the open state uses an iron-bars visual placeholder.
 - Most other interactions remain text-and-sound prototypes; the Rift Key can trigger a persistent ending flag and message, but does not animate or physically close the rift.
 - Playing tape 6 triggers the final room-shift mutation once per playback (repeated playback is phase-locked). The sound registry currently uses vanilla sound assets.
