@@ -107,6 +107,7 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_door_unlocked");
                     data.remove("nullarchive_rift_scan");
                     data.remove("nullarchive_hidden_record");
+                    data.remove("nullarchive_intake_log");
                     data.remove("nullarchive_facility_x");
                     data.remove("nullarchive_facility_y");
                     data.remove("nullarchive_facility_z");
@@ -554,7 +555,21 @@ public final class ArchiveEvents {
                 event.getEntity().displayClientMessage(Component.literal("ARCHIVE // Intake record locked. Activate the field recorder."), false);
             }
         } else if (block.equals(ModBlocks.ARCHIVE_CONCRETE.get())) {
-            event.getEntity().displayClientMessage(Component.literal("ARCHIVE // Cold concrete. No readable inscription."), false);
+            boolean atIntakeLog = data.contains("nullarchive_facility_x")
+                    && data.getString("nullarchive_facility_dimension").equals(event.getLevel().dimension().location().toString())
+                    && event.getPos().equals(new BlockPos(data.getInt("nullarchive_facility_x") + 4,
+                            data.getInt("nullarchive_facility_y") + 1, data.getInt("nullarchive_facility_z") + 2));
+            if (atIntakeLog && phase >= 1 && !data.getBoolean("nullarchive_intake_log")) {
+                data.putBoolean("nullarchive_intake_log", true);
+                String log = phase >= 3
+                        ? "INTAKE LOG // Visitor: [YOUR NAME]. Arrival recorded three days before the facility opened."
+                        : "INTAKE LOG // A visitor entry is embedded beneath the counter. The name field is unreadable.";
+                event.getEntity().displayClientMessage(Component.literal(log), false);
+                event.getLevel().playSound(null, event.getPos(), ModSounds.TAPE_CLICK.get(),
+                        SoundSource.BLOCKS, 0.6F, 0.65F);
+            } else {
+                event.getEntity().displayClientMessage(Component.literal("ARCHIVE // Cold concrete. No readable inscription."), false);
+            }
         }
     }
     @SubscribeEvent
