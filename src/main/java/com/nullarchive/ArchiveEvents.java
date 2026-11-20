@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -78,6 +79,16 @@ public final class ArchiveEvents {
                     ServerLevel level = context.getSource().getLevel();
                     BlockPos origin = player.blockPosition().offset(0, -1, 0);
                     generateFacility(level, origin);
+                    CompoundTag playerData = player.getPersistentData();
+                    playerData.putInt("nullarchive_facility_x", origin.getX());
+                    playerData.putInt("nullarchive_facility_y", origin.getY());
+                    playerData.putInt("nullarchive_facility_z", origin.getZ());
+                    playerData.remove("nullarchive_ambient_obs");
+                    playerData.remove("nullarchive_ambient_corrupt");
+                    playerData.remove("nullarchive_ambient_static");
+                    playerData.remove("nullarchive_ambient_gate");
+                    playerData.remove("nullarchive_ambient_rift");
+                    playerData.remove("nullarchive_ambient_cooldown");
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Facility generated. Start in Intake and follow the corridor."), false);
                     return 1;
                 }))
@@ -90,6 +101,9 @@ public final class ArchiveEvents {
                     data.remove(ANOMALY_KEY);
                     data.remove("nullarchive_ending_complete");
                     data.remove("nullarchive_door_unlocked");
+                    data.remove("nullarchive_facility_x");
+                    data.remove("nullarchive_facility_y");
+                    data.remove("nullarchive_facility_z");
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Your investigation progress has been reset. World blocks are unchanged."), false);
                     return 1;
                 })));
@@ -138,7 +152,9 @@ public final class ArchiveEvents {
         level.setBlock(origin.offset(26, 1, 4), corrupted, 3);
         level.setBlock(origin.offset(37, 1, 4), staticState, 3);
         level.setBlock(origin.offset(48, 1, 4), memory, 3);
-        level.setBlock(origin.offset(59, 1, 4), ModBlocks.SEALED_DOOR.get().defaultBlockState(), 3);
+        // Two-block-high threshold in the connector between Sealed Wing and Rift Chamber.
+        level.setBlock(origin.offset(65, 1, 4), ModBlocks.SEALED_DOOR.get().defaultBlockState(), 3);
+        level.setBlock(origin.offset(65, 2, 4), ModBlocks.SEALED_DOOR.get().defaultBlockState(), 3);
         level.setBlock(origin.offset(70, 1, 4), rift, 3);
         level.setBlock(origin.offset(72, 1, 4), nullState, 3);
 
@@ -160,6 +176,39 @@ public final class ArchiveEvents {
                 new ItemStack(item));
         entity.setDefaultPickUpDelay();
         level.addFreshEntity(entity);
+    }
+
+    @SubscribeEvent
+    public static void onAmbientFacilityTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide()) return;
+        Player player = event.player;
+        CompoundTag data = player.getPersistentData();
+        if (!data.contains("nullarchive_facility_x")) return;
+        int phase = data.getInt(PHASE_KEY);
+        if (phase < 2) return;
+        long now = player.level().getGameTime();
+        if (now < data.getLong("nullarchive_ambient_cooldown")) return;
+        BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
+                data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
+        BlockPos pos = player.blockPosition();
+        String key = null, message = null;
+        float pitch = 0.7F;
+        if (phase >= 2 && !data.getBoolean("nullarchive_ambient_obs") && pos.distSqr(origin.offset(15, 1, 4)) <= 16) {
+            key = "nullarchive_ambient_obs"; message = "OBSERVATION // The glass shows you standing here. You are not standing here."; pitch = 0.55F;
+        } else if (phase >= 3 && !data.getBoolean("nullarchive_ambient_corrupt") && pos.distSqr(origin.offset(26, 1, 4)) <= 16) {
+            key = "nullarchive_ambient_corrupt"; message = "BASEMENT // The floor is breathing. The recorder insists this is ventilation."; pitch = 0.65F;
+        } else if (phase >= 4 && !data.getBoolean("nullarchive_ambient_static") && pos.distSqr(origin.offset(37, 1, 4)) <= 16) {
+            key = "nullarchive_ambient_static"; message = "INCIDENT LAB // A voice from the wall says: 'You already opened the door.'"; pitch = 0.45F;
+        } else if (phase >= 4 && !data.getBoolean("nullarchive_ambient_gate") && pos.distSqr(origin.offset(65, 1, 4)) <= 25) {
+            key = "nullarchive_ambient_gate"; message = "SEALED WING // Access requires authorization. Something on the other side is counting."; pitch = 0.5F;
+        } else if (phase >= 5 && !data.getBoolean("nullarchive_ambient_rift") && pos.distSqr(origin.offset(70, 1, 4)) <= 16) {
+            key = "nullarchive_ambient_rift"; message = "BREACH // The transmission is coming from your inventory."; pitch = 0.35F;
+        }
+        if (key == null) return;
+        data.putBoolean(key, true);
+        data.putLong("nullarchive_ambient_cooldown", now + 100);
+        player.displayClientMessage(Component.literal(message), false);
+        player.level().playSound(null, pos, ModSounds.SIGNAL_DISTORTION.get(), SoundSource.PLAYERS, 0.8F, pitch);
     }
 
     @SubscribeEvent
@@ -246,6 +295,10 @@ public final class ArchiveEvents {
                 var state = event.getLevel().getBlockState(event.getPos());
                 boolean opening = !state.getValue(ArchiveDoorBlock.OPEN);
                 event.getLevel().setBlock(event.getPos(), state.setValue(ArchiveDoorBlock.OPEN, opening), 3);
+                BlockPos above = event.getPos().above();
+                var upper = event.getLevel().getBlockState(above);
+                if (upper.getBlock().equals(ModBlocks.SEALED_DOOR.get()))
+                    event.getLevel().setBlock(above, upper.setValue(ArchiveDoorBlock.OPEN, opening), 3);
                 boolean firstSealRecord = catalogueEvidence(data, DOOR_FLAG);
                 event.getEntity().displayClientMessage(Component.literal(opening
                         ? "SEALED ACCESS // Door opened. " + (firstSealRecord ? "EVIDENCE 07 recorded: the seal is older than the building." : "The corridor beyond is silent.")
@@ -275,22 +328,6 @@ public final class ArchiveEvents {
                     ? "MEMORY TERMINAL // Empty index. Catalogue evidence before querying."
                     : "MEMORY TERMINAL // Indexed fragments: " + evidence + " // Current tape: " + phase + "/6 // Query result: SUBJECT NOT FOUND.";
             event.getEntity().displayClientMessage(Component.literal(output), false);
-        } else if (block.equals(ModBlocks.SEALED_DOOR.get())) {
-            if (phase >= 4 && catalogueEvidence(data, DOOR_FLAG)) {
-                event.getEntity().displayClientMessage(Component.literal("EVIDENCE 07 // Door seal recorded. The seal is older than the building."), false);
-                event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.5F);
-            }
-            evidence = evidenceCount(data);
-            String output = phase < 4
-                    ? "SEALED ACCESS // Lock status: RED. Incident authorization missing."
-                    : evidence < 3
-                    ? "SEALED ACCESS // Authorization accepted. Evidence index incomplete."
-                    : "SEALED ACCESS // Seal is intact. Door state: OPEN (impossible).";
-            event.getEntity().displayClientMessage(Component.literal(output), false);
-            if (phase >= 4 && evidence >= 3) {
-                event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(),
-                        SoundSource.BLOCKS, 1.0F, 0.6F);
-            }
         } else if (block.equals(ModBlocks.RIFT_FRAME.get())) {
             var held = event.getItemStack();
             if (held.is(ModItems.RIFT_KEY.get())) {
