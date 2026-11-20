@@ -482,6 +482,11 @@ public final class ArchiveEvents {
                 event.getEntity().displayClientMessage(Component.literal(output), false);
             }
         } else if (block.equals(ModBlocks.RIFT_FRAME.get())) {
+            if (phase >= 5 && !data.getBoolean("nullarchive_rift_scan")) {
+                data.putBoolean("nullarchive_rift_scan", true);
+                event.getEntity().displayClientMessage(Component.literal("RIFT SCAN // Frame resonance detected. The missing segment is not missing; it is displaced. EVIDENCE 07 is available only after the seal is opened."), false);
+                event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(), SoundSource.BLOCKS, 0.8F, 0.45F);
+            }
             var held = event.getItemStack();
             if (held.is(ModItems.RIFT_KEY.get())) {
                 if (data.getBoolean("nullarchive_ending_complete")) {
