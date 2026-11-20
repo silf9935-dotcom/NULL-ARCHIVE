@@ -217,6 +217,12 @@ public final class ArchiveEvents {
         } else if (key.equals("nullarchive_ambient_static")) {
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
                 player.level().setBlock(origin.offset(37 + dx, 0, 4 + dz), ModBlocks.STATIC_BLOCK.get().defaultBlockState(), 3);
+        } else if (key.equals("nullarchive_ambient_gate")) {
+            // The sealed wing appears to gain a side passage, but the "opening" is a glass wall.
+            for (int y = 1; y <= 3; y++) {
+                player.level().setBlock(origin.offset(70, y, 0), ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
+            }
+            player.level().setBlock(origin.offset(70, 2, 0), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
         } else if (key.equals("nullarchive_ambient_rift")) {
             player.level().setBlock(origin.offset(73, 1, 4), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
         }
