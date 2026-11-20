@@ -406,15 +406,54 @@ public final class ArchiveEvents {
     @SubscribeEvent
     public static void onEmfUse(PlayerInteractEvent.RightClickItem event) {
         if (event.getLevel().isClientSide() || !event.getItemStack().is(ModItems.EMF_READER.get())) return;
-        int phase = event.getEntity().getPersistentData().getInt(PHASE_KEY);
-        String reading = phase < 2 ? "EMF // Baseline. No signal."
-                : phase < 4 ? "EMF // Weak pulse detected. Direction unstable."
-                : phase < 5 ? "EMF // CRITICAL. Signal originates inside the recorder."
-                : "EMF // ERROR: Receiver is reading its own serial number.";
-        event.getEntity().displayClientMessage(Component.literal(reading), false);
-        event.getLevel().playSound(null, event.getEntity().blockPosition(),
-                phase >= 4 ? ModSounds.SIGNAL_DISTORTION.get() : ModSounds.ARCHIVE_PULSE.get(),
-                SoundSource.PLAYERS, 0.7F, phase >= 4 ? 0.65F : 1.0F);
+        Player player = event.getEntity();
+        CompoundTag data = player.getPersistentData();
+        int phase = data.getInt(PHASE_KEY);
+        if (!data.contains("nullarchive_facility_x")
+                || !data.getString("nullarchive_facility_dimension").equals(event.getLevel().dimension().location().toString())) {
+            player.displayClientMessage(Component.literal("EMF // Baseline. No archive signal in this dimension."), false);
+            event.getLevel().playSound(null, player.blockPosition(), ModSounds.ARCHIVE_PULSE.get(),
+                    SoundSource.PLAYERS, 0.45F, 1.1F);
+            return;
+        }
+        BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
+                data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
+        BlockPos[] targets = {
+                origin.offset(4, 1, 2), origin.offset(15, 1, 4), origin.offset(26, 1, 4),
+                origin.offset(37, 1, 4), origin.offset(49, 0, 2), origin.offset(65, 1, 4),
+                origin.offset(70, 1, 4), origin.offset(74, 1, 4)
+        };
+        String[] labels = {
+                "INTAKE // Visitor log interference.", "OBSERVATION // Reflection signal.",
+                "BASEMENT // Organic pulse beneath the floor.", "INCIDENT LAB // Static in the walls.",
+                "RECORDS // A concealed index is nearby.", "SEALED WING // Lock resonance.",
+                "RIFT // Displaced frame signal.", "NULL // The final recording is rewriting this room."
+        };
+        int[] gates = {1, 2, 3, 4, 4, 4, 5, 6};
+        int bestIndex = -1;
+        double bestDistance = 65.0;
+        for (int i = 0; i < targets.length; i++) {
+            if (phase < gates[i]) continue;
+            double distance = player.blockPosition().distSqr(targets[i]);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestIndex = i;
+            }
+        }
+        if (bestIndex < 0) {
+            player.displayClientMessage(Component.literal("EMF // Signal below threshold. Advance the recordings or move deeper into the facility."), false);
+            event.getLevel().playSound(null, player.blockPosition(), ModSounds.ARCHIVE_PULSE.get(),
+                    SoundSource.PLAYERS, 0.5F, 0.9F);
+            return;
+        }
+        int strength = bestDistance <= 4 ? 5 : bestDistance <= 9 ? 4 : bestDistance <= 16 ? 3 : bestDistance <= 36 ? 2 : 1;
+        String direction = targets[bestIndex].getX() > player.blockPosition().getX() ? "ahead"
+                : targets[bestIndex].getX() < player.blockPosition().getX() ? "behind" : "nearby";
+        player.displayClientMessage(Component.literal("EMF // " + strength + "/5 // " + labels[bestIndex]
+                + " Direction: " + direction + ". Signal does not catalogue evidence."), false);
+        event.getLevel().playSound(null, player.blockPosition(),
+                strength >= 4 || phase >= 5 ? ModSounds.SIGNAL_DISTORTION.get() : ModSounds.ARCHIVE_PULSE.get(),
+                SoundSource.PLAYERS, 0.65F, 0.55F + strength * 0.12F);
     }
 
     @SubscribeEvent
