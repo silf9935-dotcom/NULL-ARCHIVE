@@ -83,6 +83,7 @@ public final class ArchiveEvents {
                     playerData.putInt("nullarchive_facility_x", origin.getX());
                     playerData.putInt("nullarchive_facility_y", origin.getY());
                     playerData.putInt("nullarchive_facility_z", origin.getZ());
+                    playerData.putString("nullarchive_facility_dimension", level.dimension().location().toString());
                     playerData.remove("nullarchive_ambient_obs");
                     playerData.remove("nullarchive_ambient_corrupt");
                     playerData.remove("nullarchive_ambient_static");
@@ -183,7 +184,7 @@ public final class ArchiveEvents {
         if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide()) return;
         Player player = event.player;
         CompoundTag data = player.getPersistentData();
-        if (!data.contains("nullarchive_facility_x")) return;
+        if (!data.contains("nullarchive_facility_x") || !data.getString("nullarchive_facility_dimension").equals(player.level().dimension().location().toString())) return;
         int phase = data.getInt(PHASE_KEY);
         if (phase < 2) return;
         long now = player.level().getGameTime();
@@ -205,6 +206,20 @@ public final class ArchiveEvents {
             key = "nullarchive_ambient_rift"; message = "BREACH // The transmission is coming from your inventory."; pitch = 0.35F;
         }
         if (key == null) return;
+        // Environmental changes make the anomaly persist in the facility.
+        if (key.equals("nullarchive_ambient_obs")) {
+            BlockPos wall = origin.offset(15, 1, 0);
+            player.level().setBlock(wall, ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
+            player.level().setBlock(wall.above(), ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
+        } else if (key.equals("nullarchive_ambient_corrupt")) {
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+                player.level().setBlock(origin.offset(26 + dx, 0, 4 + dz), ModBlocks.CORRUPTED_STONE.get().defaultBlockState(), 3);
+        } else if (key.equals("nullarchive_ambient_static")) {
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+                player.level().setBlock(origin.offset(37 + dx, 0, 4 + dz), ModBlocks.STATIC_BLOCK.get().defaultBlockState(), 3);
+        } else if (key.equals("nullarchive_ambient_rift")) {
+            player.level().setBlock(origin.offset(73, 1, 4), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
+        }
         data.putBoolean(key, true);
         data.putLong("nullarchive_ambient_cooldown", now + 100);
         player.displayClientMessage(Component.literal(message), false);
