@@ -311,6 +311,23 @@ public final class ArchiveEvents {
         data.putLong("nullarchive_ambient_cooldown", now + 100);
         player.displayClientMessage(Component.literal(message), false);
         player.level().playSound(null, pos, ModSounds.SIGNAL_DISTORTION.get(), SoundSource.PLAYERS, 0.8F, pitch);
+
+        // Unscheduled, low-frequency micro-anomalies make revisits less predictable.
+        long anomalyCooldown = data.getLong("nullarchive_random_anomaly_cooldown");
+        boolean insideFacility = pos.getX() >= origin.getX() && pos.getX() <= origin.getX() + 76
+                && pos.getZ() >= origin.getZ() && pos.getZ() <= origin.getZ() + 8;
+        if (phase >= 2 && insideFacility && now >= anomalyCooldown && player.getRandom().nextInt(1600) == 0) {
+            String[] anomalies = {
+                    "SIGNAL // A recording clicks on. It contains three seconds of silence.",
+                    "ARCHIVE // Your footsteps echo twice. The second echo is closer.",
+                    "NULL // The room number on the wall changes when you look away."
+            };
+            String anomalyText = anomalies[player.getRandom().nextInt(anomalies.length)];
+            data.putLong("nullarchive_random_anomaly_cooldown", now + 600);
+            player.displayClientMessage(Component.literal(anomalyText), false);
+            player.level().playSound(null, pos, ModSounds.TAPE_CLICK.get(), SoundSource.AMBIENT, 0.35F,
+                    0.45F + player.getRandom().nextFloat() * 0.4F);
+        }
     }
 
     @SubscribeEvent
