@@ -504,8 +504,13 @@ public final class ArchiveEvents {
                     event.getEntity().displayClientMessage(Component.literal(inscription), false);
                     event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(),
                             SoundSource.BLOCKS, 0.45F, 0.55F + phase * 0.08F);
+                } else {
+                    event.getEntity().displayClientMessage(Component.literal("ARCHIVE // The surface is cold. The inscription has not changed."), false);
                 }
             }
+        } else if (block.equals(ModBlocks.ARCHIVE_CONCRETE.get())) {
+            // Concrete archive fixtures behave as inert surfaces.
+            event.getEntity().displayClientMessage(Component.literal("ARCHIVE // Cold concrete. No readable inscription."), false);
         }
     }
     @SubscribeEvent
