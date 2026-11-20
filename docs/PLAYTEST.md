@@ -17,7 +17,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 
 ## Admin test commands
 
-- `/nullarchive generate` — builds a compact seven-room facility around the player (permission level 2). Run in an open area; it replaces blocks in its footprint and drops curated progression items. It is a command-built prototype, not automatic world generation. Start in Intake and follow the corridor. The two-block sealed threshold is in the connector before Rift Chamber; first access requires tape 4, three clues, and the Archive Key.
+- `/nullarchive generate` — builds a compact seven-room facility around the player (permission level 2). Run in an open area; it replaces blocks in its footprint and drops curated progression items. Rooms now have landmarks: Intake counter, Basement ceiling strips, Observation glass divider, Incident Lab anomaly floor, Records shelves, Sealed Wing warning floor, and Rift Chamber corrupted cross. It is a command-built prototype, not automatic world generation. Start in Intake and follow the corridor. The two-block sealed threshold is in the connector before Rift Chamber; first access requires tape 4, three clues, and the Archive Key.
 - `/nullarchive status` — shows tape phase, evidence count, anomaly count, and ending state (permission level 2).
 - `/nullarchive reset` — resets player progression and per-player anomaly/stalking triggers for a fresh test. It does not reset world blocks or the door's physical state.
 
