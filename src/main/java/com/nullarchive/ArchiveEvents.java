@@ -247,8 +247,28 @@ public final class ArchiveEvents {
         event.getLevel().playSound(null, event.getEntity().blockPosition(),
                 ModSounds.TAPE_CLICK.get(), SoundSource.PLAYERS, 0.8F, 0.85F + phase * 0.04F);
         data.putInt(PHASE_KEY, phase + 1);
+        if (phase + 1 == 6) triggerFinalArchiveShift(event.getEntity());
         NullArchive.LOGGER.info("Archive phase {} recorded for {}", phase + 1,
                 event.getEntity().getGameProfile().getName());
+    }
+
+    private static void triggerFinalArchiveShift(Player player) {
+        CompoundTag data = player.getPersistentData();
+        if (!data.contains("nullarchive_facility_x")
+                || !data.getString("nullarchive_facility_dimension").equals(player.level().dimension().location().toString())) return;
+        ServerLevel level = (ServerLevel) player.level();
+        BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
+                data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
+        // The final tape permanently rewrites the Rift Chamber.
+        for (int y = 1; y <= 3; y++) {
+            level.setBlock(origin.offset(74, y, 4), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
+            level.setBlock(origin.offset(74, y, 5), ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
+        }
+        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+            level.setBlock(origin.offset(70 + dx, 0, 4 + dz), ModBlocks.CORRUPTED_STONE.get().defaultBlockState(), 3);
+        level.setBlock(origin.offset(73, 1, 4), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
+        player.displayClientMessage(Component.literal("FACILITY SHIFT // The final tape rewrites the room. The breach is no longer contained by architecture."), false);
+        level.playSound(null, player.blockPosition(), ModSounds.SIGNAL_DISTORTION.get(), SoundSource.PLAYERS, 1.0F, 0.3F);
     }
 
     @SubscribeEvent
