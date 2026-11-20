@@ -64,6 +64,32 @@ public final class ArchiveEvents {
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("archivejournal").executes(context -> {
+            Player player = context.getSource().getPlayerOrException();
+            CompoundTag data = player.getPersistentData();
+            int phase = data.getInt(PHASE_KEY);
+            int flags = data.getInt(EVIDENCE_FLAGS_KEY);
+            if (flags == 0) flags = (1 << Math.min(data.getInt(EVIDENCE_KEY), 5)) - 1;
+            player.displayClientMessage(Component.literal("FIELD JOURNAL // NULL ARCHIVE"), false);
+            player.displayClientMessage(Component.literal("Recordings: " + phase + "/6 // Unique clues: " + evidenceCount(data) + "/8"), false);
+            player.displayClientMessage(Component.literal((phase >= 1 ? "[RECORDED]" : "[LOCKED]") + " 01 — Evidence Tape"), false);
+            player.displayClientMessage(Component.literal((phase >= 2 ? "[RECORDED]" : "[LOCKED]") + " 02 — Basement"), false);
+            player.displayClientMessage(Component.literal((phase >= 3 ? "[RECORDED]" : "[LOCKED]") + " 03 — Observation"), false);
+            player.displayClientMessage(Component.literal((phase >= 4 ? "[RECORDED]" : "[LOCKED]") + " 04 — Incident"), false);
+            player.displayClientMessage(Component.literal((phase >= 5 ? "[RECORDED]" : "[LOCKED]") + " 05 — Breach"), false);
+            player.displayClientMessage(Component.literal((phase >= 6 ? "[RECORDED]" : "[LOCKED]") + " 06 — Null"), false);
+            String[] clueNames = {"Evidence Tape", "Damaged Photograph", "Memory Fragment", "Sealed Document",
+                    "Observation Glass", "Terminal Query", "Sealed Door", "Hidden Records"};
+            int[] clueFlags = {EVIDENCE_TAPE_FLAG, PHOTO_FLAG, MEMORY_FLAG, DOCUMENT_FLAG,
+                    GLASS_FLAG, TERMINAL_FLAG, DOOR_FLAG, HIDDEN_FLAG};
+            for (int i = 0; i < clueNames.length; i++)
+                player.displayClientMessage(Component.literal(((flags & clueFlags[i]) != 0 ? "[FOUND]" : "[UNKNOWN]")
+                        + " CLUE " + (i + 1) + " — " + clueNames[i]), false);
+            player.displayClientMessage(Component.literal("ENDING // " + (phase >= 6 && evidenceCount(data) >= 5
+                    ? "Requirements met. Locate the Rift Frame and use the Rift Key."
+                    : "Requires all 6 recordings and 5 distinct clues.")), false);
+            return 1;
+        }));
         event.getDispatcher().register(Commands.literal("nullarchive")
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("status").executes(context -> {
