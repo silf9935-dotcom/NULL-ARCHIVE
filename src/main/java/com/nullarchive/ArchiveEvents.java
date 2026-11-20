@@ -10,6 +10,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundSource;
@@ -139,6 +141,25 @@ public final class ArchiveEvents {
         level.setBlock(origin.offset(59, 1, 4), ModBlocks.SEALED_DOOR.get().defaultBlockState(), 3);
         level.setBlock(origin.offset(70, 1, 4), rift, 3);
         level.setBlock(origin.offset(72, 1, 4), nullState, 3);
+
+        // Curated evidence/key drops at room landmarks (one-time per generation).
+        drop(level, origin.offset(3, 1, 3), ModItems.EVIDENCE_TAPE.get());
+        drop(level, origin.offset(14, 1, 3), ModItems.DAMAGED_PHOTOGRAPH.get());
+        drop(level, origin.offset(25, 1, 3), ModItems.MEMORY_FRAGMENT.get());
+        drop(level, origin.offset(36, 1, 3), ModItems.SEALED_DOCUMENT.get());
+        drop(level, origin.offset(47, 1, 3), ModItems.TERMINAL_CARTRIDGE.get());
+        drop(level, origin.offset(57, 1, 3), ModItems.ARCHIVE_KEY.get());
+        drop(level, origin.offset(69, 1, 3), ModItems.RIFT_KEY.get());
+        drop(level, origin.offset(71, 1, 3), ModItems.NULL_SHARD.get());
+        drop(level, origin.offset(68, 1, 5), ModItems.EMF_READER.get());
+        drop(level, origin.offset(24, 1, 5), ModItems.FIELD_RECORDER.get());
+    }
+
+    private static void drop(ServerLevel level, BlockPos pos, net.minecraft.world.item.Item item) {
+        ItemEntity entity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.25, pos.getZ() + 0.5,
+                new ItemStack(item));
+        entity.setDefaultPickUpDelay();
+        level.addFreshEntity(entity);
     }
 
     @SubscribeEvent
