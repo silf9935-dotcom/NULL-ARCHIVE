@@ -127,7 +127,14 @@ public final class ArchiveEvents {
                 event.getEntity().displayClientMessage(Component.literal("SEALED ACCESS // Lock status: RED. Incident authorization missing."), false);
             } else if (evidence < 3) {
                 event.getEntity().displayClientMessage(Component.literal("SEALED ACCESS // Three indexed clues required for access."), false);
+            } else if (!data.getBoolean("nullarchive_door_unlocked")
+                    && !event.getItemStack().is(ModItems.ARCHIVE_KEY.get())) {
+                event.getEntity().displayClientMessage(Component.literal("SEALED ACCESS // The lock accepts an Archive Key."), false);
             } else {
+                if (!data.getBoolean("nullarchive_door_unlocked")) {
+                    data.putBoolean("nullarchive_door_unlocked", true);
+                    if (!event.getEntity().getAbilities().instabuild) event.getItemStack().shrink(1);
+                }
                 var state = event.getLevel().getBlockState(event.getPos());
                 boolean opening = !state.getValue(ArchiveDoorBlock.OPEN);
                 event.getLevel().setBlock(event.getPos(), state.setValue(ArchiveDoorBlock.OPEN, opening), 3);
