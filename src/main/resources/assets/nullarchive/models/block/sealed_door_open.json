@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/iron_bars",
+  "textures": {
+    "particle": "minecraft:block/iron_bars"
+  }
+}
