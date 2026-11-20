@@ -8,6 +8,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundSource;
@@ -69,6 +71,14 @@ public final class ArchiveEvents {
                             + " // Ending " + (data.getBoolean("nullarchive_ending_complete") ? "COMPLETE" : "INCOMPLETE")), false);
                     return 1;
                 }))
+                .then(Commands.literal("generate").executes(context -> {
+                    Player player = context.getSource().getPlayerOrException();
+                    ServerLevel level = context.getSource().getLevel();
+                    BlockPos origin = player.blockPosition().offset(4, 0, 4);
+                    generateFacility(level, origin);
+                    player.displayClientMessage(Component.literal("NULL ARCHIVE // Facility generated. Start in Intake and follow the corridor."), false);
+                    return 1;
+                }))
                 .then(Commands.literal("reset").executes(context -> {
                     Player player = context.getSource().getPlayerOrException();
                     CompoundTag data = player.getPersistentData();
@@ -83,6 +93,49 @@ public final class ArchiveEvents {
                 })));
     }
 
+
+
+    private static void generateFacility(ServerLevel level, BlockPos origin) {
+        // Admin-only, compact seven-room linear prototype. Each room is 9x9x5.
+        var air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+        var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
+        var tile = ModBlocks.ARCHIVE_TILE.get().defaultBlockState();
+        var glass = ModBlocks.BLACK_GLASS.get().defaultBlockState();
+        var corrupted = ModBlocks.CORRUPTED_STONE.get().defaultBlockState();
+        var memory = ModBlocks.MEMORY_BLOCK.get().defaultBlockState();
+        var staticState = ModBlocks.STATIC_BLOCK.get().defaultBlockState();
+        var nullState = ModBlocks.NULL_BLOCK.get().defaultBlockState();
+        var observation = ModBlocks.OBSERVATION_GLASS.get().defaultBlockState();
+        var rift = ModBlocks.RIFT_FRAME.get().defaultBlockState();
+        for (int room = 0; room < 7; room++) {
+            int sx = room * 11;
+            for (int x = 0; x < 9; x++) for (int z = 0; z < 9; z++) {
+                boolean wall = x == 0 || z == 0 || x == 8 || z == 8;
+                BlockPos p = origin.offset(sx + x, 0, z);
+                level.setBlock(p, room == 2 ? corrupted : tile, 3);
+                level.setBlock(p.above(4), concrete, 3);
+                for (int y = 1; y <= 3; y++) level.setBlock(p.above(y), wall ? concrete : air, 3);
+                if (wall && (room == 3 || room == 4) && z != 0 && z != 8)
+                    level.setBlock(p.above(), glass, 3);
+            }
+            if (room < 6) {
+                for (int y = 1; y <= 3; y++) {
+                    level.setBlock(origin.offset(sx + 8, y, 4), air, 3);
+                    level.setBlock(origin.offset(sx + 9, y, 4), air, 3);
+                    level.setBlock(origin.offset(sx + 10, y, 4), air, 3);
+                }
+                for (int x = 8; x <= 10; x++) level.setBlock(origin.offset(sx + x, 0, 4), tile, 3);
+            }
+        }
+        level.setBlock(origin.offset(4, 1, 4), memory, 3);
+        level.setBlock(origin.offset(15, 1, 4), observation, 3);
+        level.setBlock(origin.offset(26, 1, 4), corrupted, 3);
+        level.setBlock(origin.offset(37, 1, 4), staticState, 3);
+        level.setBlock(origin.offset(48, 1, 4), memory, 3);
+        level.setBlock(origin.offset(59, 1, 4), ModBlocks.SEALED_DOOR.get().defaultBlockState(), 3);
+        level.setBlock(origin.offset(70, 1, 4), rift, 3);
+        level.setBlock(origin.offset(72, 1, 4), nullState, 3);
+    }
 
     @SubscribeEvent
     public static void onRecorderUse(PlayerInteractEvent.RightClickItem event) {
