@@ -21,7 +21,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 - `/nullarchive status` — shows tape phase, evidence count, anomaly count, and ending state (permission level 2).
 - `/nullarchive reset` — resets player progression for a fresh test. It does not reset world blocks or the door's physical state.
 
-- The generator places Field Recorder, EMF Reader, evidence items, Terminal Cartridge, Archive Key, Rift Key, and Null Shard as item drops at room landmarks. Running the command again duplicates these drops. Ambient events are proximity-triggered, phase-gated, and each fires once per generation. Observation permanently changes a wall section to black glass; Basement and Incident Lab mutate floor patches into anomaly blocks; the Rift event adds a Null Block. These effects persist in the world. Playing tape 6 also permanently rewrites the Rift Chamber: Null Blocks breach the wall and corrupted stone spreads across the floor.
+- The generator places Field Recorder, EMF Reader, evidence items, Terminal Cartridge, Archive Key, Rift Key, and Null Shard as item drops at room landmarks. Running the command again duplicates these drops. Ambient events are proximity-triggered, phase-gated, and each fires once per generation. Observation permanently changes a wall section to black glass; Basement and Incident Lab mutate floor patches into anomaly blocks; the Sealed Wing event turns a side-wall section into black glass with a Null Block embedded in it (a false passage); the Rift event adds a Null Block. These effects persist in the world. Playing tape 6 also permanently rewrites the Rift Chamber: Null Blocks breach the wall and corrupted stone spreads across the floor.
 
 ## Known limitations
 
