@@ -105,6 +105,9 @@ public final class ArchiveEvents {
                     ServerLevel level = context.getSource().getLevel();
                     BlockPos origin = player.blockPosition().offset(0, -1, 0);
                     generateFacility(level, origin);
+                    // Place the operator safely inside Intake instead of at the room corner/wall.
+                    player.setPos(origin.getX() + 4.5, origin.getY() + 1.0, origin.getZ() + 4.5);
+                    player.setYRot(-90.0F);
                     CompoundTag playerData = player.getPersistentData();
                     playerData.putInt("nullarchive_facility_x", origin.getX());
                     playerData.putInt("nullarchive_facility_y", origin.getY());
