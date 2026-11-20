@@ -10,7 +10,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 4. Use the recorder again. Later tapes require evidence.
 5. Right-click Observation Glass after tape 2 to record a clue. Right-click Memory Block after tape 2 to record a separate terminal clue and read its output. With at least two indexed clues, use a Terminal Cartridge on Memory Block to query `/SUBJECT/NULL/EXIT_LOG.txt`; the cartridge is consumed outside creative.
 6. After tape 4 and three clues, use Archive Key on Sealed Door for the first unlock (consumed outside creative), then right-click to open/close it physically. The first access also catalogues the seal clue. Before the gate, it reports denied access.
-7. Right-click Static Block, Null Block, or Corrupted Stone after the second tape to trigger escalating anomaly messages.
+7. Right-click Static Block, Null Block, or Corrupted Stone after the second tape to trigger escalating anomaly messages. Right-click Archive Tile or Archive Concrete once per tape phase to discover phase-specific inscriptions; each phase's inscription is shown only once per player.
 8. Right-click the EMF Reader, Null Shard, Archive Key, Rift Key, and Terminal Cartridge to hear their current prototype responses.
 9. After generating the facility, proximity events trigger in Observation, Basement, Incident Lab, Sealed Wing, and Rift Chamber as you advance phases. Each event is once per generated layout.
 10. For the ending: play all six tapes, catalogue at least five distinct clues out of seven, then right-click the Rift Frame while holding the Rift Key. In creative mode the key is not consumed.
