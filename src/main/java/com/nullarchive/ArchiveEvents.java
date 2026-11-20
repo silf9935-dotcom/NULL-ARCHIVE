@@ -383,17 +383,31 @@ public final class ArchiveEvents {
                 event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Observation glass clue already recorded."), false);
             }
         } else if (block.equals(ModBlocks.MEMORY_BLOCK.get())) {
-            if (phase >= 2 && catalogueEvidence(data, TERMINAL_FLAG)) {
-                event.getEntity().displayClientMessage(Component.literal("EVIDENCE 06 // Terminal memory recorded. The subject field is blank."), false);
-                event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.8F);
+            var held = event.getItemStack();
+            if (held.is(ModItems.TERMINAL_CARTRIDGE.get())) {
+                if (phase < 2 || evidence < 2) {
+                    event.getEntity().displayClientMessage(Component.literal("TERMINAL // Cartridge rejected. Two recordings and two indexed clues required."), false);
+                } else {
+                    if (!event.getEntity().getAbilities().instabuild) held.shrink(1);
+                    boolean firstQuery = catalogueEvidence(data, TERMINAL_FLAG);
+                    event.getEntity().displayClientMessage(Component.literal(firstQuery
+                            ? "TERMINAL QUERY // /SUBJECT/NULL/EXIT_LOG.txt // EVIDENCE 06 recorded. The subject field is blank."
+                            : "TERMINAL QUERY // /SUBJECT/NULL/EXIT_LOG.txt // The file timestamp is tomorrow."), false);
+                    event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.8F, 0.55F);
+                }
+            } else {
+                if (phase >= 2 && catalogueEvidence(data, TERMINAL_FLAG)) {
+                    event.getEntity().displayClientMessage(Component.literal("EVIDENCE 06 // Terminal memory recorded. The subject field is blank."), false);
+                    event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.8F);
+                }
+                evidence = evidenceCount(data);
+                String output = phase < 2
+                        ? "MEMORY TERMINAL // ACCESS DENIED. Complete the intake recordings."
+                        : evidence < 1
+                        ? "MEMORY TERMINAL // Empty index. Catalogue evidence before querying."
+                        : "MEMORY TERMINAL // Indexed fragments: " + evidence + " // Current tape: " + phase + "/6 // Query result: SUBJECT NOT FOUND.";
+                event.getEntity().displayClientMessage(Component.literal(output), false);
             }
-            evidence = evidenceCount(data);
-            String output = phase < 2
-                    ? "MEMORY TERMINAL // ACCESS DENIED. Complete the intake recordings."
-                    : evidence < 1
-                    ? "MEMORY TERMINAL // Empty index. Catalogue evidence before querying."
-                    : "MEMORY TERMINAL // Indexed fragments: " + evidence + " // Current tape: " + phase + "/6 // Query result: SUBJECT NOT FOUND.";
-            event.getEntity().displayClientMessage(Component.literal(output), false);
         } else if (block.equals(ModBlocks.RIFT_FRAME.get())) {
             var held = event.getItemStack();
             if (held.is(ModItems.RIFT_KEY.get())) {
