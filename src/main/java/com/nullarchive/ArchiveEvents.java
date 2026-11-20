@@ -108,6 +108,7 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_rift_scan");
                     data.remove("nullarchive_hidden_record");
                     data.remove("nullarchive_intake_log");
+                    data.remove("nullarchive_intake_log_reveal");
                     data.remove("nullarchive_facility_x");
                     data.remove("nullarchive_facility_y");
                     data.remove("nullarchive_facility_z");
@@ -559,14 +560,21 @@ public final class ArchiveEvents {
                     && data.getString("nullarchive_facility_dimension").equals(event.getLevel().dimension().location().toString())
                     && event.getPos().equals(new BlockPos(data.getInt("nullarchive_facility_x") + 4,
                             data.getInt("nullarchive_facility_y") + 1, data.getInt("nullarchive_facility_z") + 2));
-            if (atIntakeLog && phase >= 1 && !data.getBoolean("nullarchive_intake_log")) {
-                data.putBoolean("nullarchive_intake_log", true);
-                String log = phase >= 3
-                        ? "INTAKE LOG // Visitor: [YOUR NAME]. Arrival recorded three days before the facility opened."
-                        : "INTAKE LOG // A visitor entry is embedded beneath the counter. The name field is unreadable.";
-                event.getEntity().displayClientMessage(Component.literal(log), false);
-                event.getLevel().playSound(null, event.getPos(), ModSounds.TAPE_CLICK.get(),
-                        SoundSource.BLOCKS, 0.6F, 0.65F);
+            if (atIntakeLog && phase >= 1) {
+                boolean firstDiscovery = !data.getBoolean("nullarchive_intake_log");
+                boolean lateReveal = phase >= 3 && !data.getBoolean("nullarchive_intake_log_reveal");
+                if (firstDiscovery) data.putBoolean("nullarchive_intake_log", true);
+                if (lateReveal) data.putBoolean("nullarchive_intake_log_reveal", true);
+                if (firstDiscovery || lateReveal) {
+                    String log = phase >= 3
+                            ? "INTAKE LOG // Visitor: [YOUR NAME]. Arrival recorded three days before the facility opened."
+                            : "INTAKE LOG // A visitor entry is embedded beneath the counter. The name field is unreadable.";
+                    event.getEntity().displayClientMessage(Component.literal(log), false);
+                    event.getLevel().playSound(null, event.getPos(), ModSounds.TAPE_CLICK.get(),
+                            SoundSource.BLOCKS, 0.6F, phase >= 3 ? 0.45F : 0.65F);
+                } else {
+                    event.getEntity().displayClientMessage(Component.literal("INTAKE LOG // The entry is still unreadable. The date field is scratched out."), false);
+                }
             } else {
                 event.getEntity().displayClientMessage(Component.literal("ARCHIVE // Cold concrete. No readable inscription."), false);
             }
