@@ -33,7 +33,7 @@ public final class ArchiveEvents {
         if (event.getLevel().isClientSide() || !event.getItemStack().is(ModItems.FIELD_RECORDER.get())) return;
         CompoundTag data = event.getEntity().getPersistentData();
         int phase = data.getInt(PHASE_KEY);
-        int evidence = data.getInt(EVIDENCE_KEY);
+        int evidence = evidenceCount(data);
 
         if (phase >= 3 && phase < 5 && evidence < phase - 1) {
             event.getEntity().displayClientMessage(Component.literal(
@@ -61,7 +61,7 @@ public final class ArchiveEvents {
                 && !stack.is(ModItems.MEMORY_FRAGMENT.get()) && !stack.is(ModItems.SEALED_DOCUMENT.get())) return;
 
         CompoundTag data = event.getEntity().getPersistentData();
-        int evidence = data.getInt(EVIDENCE_KEY);
+        int evidence = evidenceCount(data);
         if (evidence >= 5) {
             event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Archive limit reached."), false);
             return;
@@ -120,7 +120,7 @@ public final class ArchiveEvents {
                     event.getEntity().displayClientMessage(Component.literal("NULL ARCHIVE // The breach is sealed. There is nothing left to unlock."), false);
                 } else if (phase < 6 || evidence < 5) {
                     event.getEntity().displayClientMessage(Component.literal(
-                            "RIFT LOCK // Final tape and all five evidence fragments required. Progress: " + phase + "/6 // Evidence: " + evidence + "/5"), false);
+                            "RIFT LOCK // Final tape and all five evidence fragments required. Progress: " + phase + "/6 // Evidence: " + evidence + "/7"), false);
                 } else {
                     data.putBoolean("nullarchive_ending_complete", true);
                     if (!event.getEntity().getAbilities().instabuild) held.shrink(1);
