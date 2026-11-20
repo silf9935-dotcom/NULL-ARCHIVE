@@ -205,6 +205,19 @@ public final class ArchiveEvents {
         } else if (phase >= 5 && !data.getBoolean("nullarchive_ambient_rift") && pos.distSqr(origin.offset(70, 1, 4)) <= 16) {
             key = "nullarchive_ambient_rift"; message = "BREACH // The transmission is coming from your inventory."; pitch = 0.35F;
         }
+        if (key == null && phase >= 3 && !data.getBoolean("nullarchive_presence_" + phase)
+                && pos.distSqr(origin.offset(32, 1, 4)) <= 900) {
+            // A sound is placed behind the player, creating a stalking cue without a fake entity.
+            float yaw = player.getYRot() * ((float) Math.PI / 180F);
+            BlockPos behind = pos.offset((int) Math.round(Math.sin(yaw) * 4),
+                    0, (int) Math.round(Math.cos(yaw) * 4));
+            player.level().playSound(null, behind, SoundEvents.AMETHYST_BLOCK_CHIME,
+                    SoundSource.AMBIENT, 0.45F, 0.45F + phase * 0.06F);
+            data.putBoolean("nullarchive_presence_" + phase, true);
+            data.putLong("nullarchive_ambient_cooldown", now + 100);
+            player.displayClientMessage(Component.literal("SIGNAL // Footsteps behind you. The corridor is empty."), false);
+            return;
+        }
         if (key == null) return;
         // Environmental changes make the anomaly persist in the facility.
         if (key.equals("nullarchive_ambient_obs")) {
