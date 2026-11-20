@@ -295,10 +295,11 @@ public final class ArchiveEvents {
                 var state = event.getLevel().getBlockState(event.getPos());
                 boolean opening = !state.getValue(ArchiveDoorBlock.OPEN);
                 event.getLevel().setBlock(event.getPos(), state.setValue(ArchiveDoorBlock.OPEN, opening), 3);
-                BlockPos above = event.getPos().above();
-                var upper = event.getLevel().getBlockState(above);
-                if (upper.getBlock().equals(ModBlocks.SEALED_DOOR.get()))
-                    event.getLevel().setBlock(above, upper.setValue(ArchiveDoorBlock.OPEN, opening), 3);
+                for (BlockPos linkedPos : new BlockPos[] { event.getPos().above(), event.getPos().below() }) {
+                    var linked = event.getLevel().getBlockState(linkedPos);
+                    if (linked.getBlock().equals(ModBlocks.SEALED_DOOR.get()))
+                        event.getLevel().setBlock(linkedPos, linked.setValue(ArchiveDoorBlock.OPEN, opening), 3);
+                }
                 boolean firstSealRecord = catalogueEvidence(data, DOOR_FLAG);
                 event.getEntity().displayClientMessage(Component.literal(opening
                         ? "SEALED ACCESS // Door opened. " + (firstSealRecord ? "EVIDENCE 07 recorded: the seal is older than the building." : "The corridor beyond is silent.")
