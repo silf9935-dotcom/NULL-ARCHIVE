@@ -3,6 +3,8 @@ package com.nullarchive;
 import com.nullarchive.registry.ModBlocks;
 import com.nullarchive.registry.ModItems;
 import com.nullarchive.registry.ModSounds;
+import com.nullarchive.block.ArchiveDoorBlock;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundSource;
@@ -120,7 +122,24 @@ public final class ArchiveEvents {
         int phase = data.getInt(PHASE_KEY);
         int evidence = evidenceCount(data);
 
-        if (block.equals(ModBlocks.OBSERVATION_GLASS.get())) {
+        if (block.equals(ModBlocks.SEALED_DOOR.get())) {
+            if (phase < 4) {
+                event.getEntity().displayClientMessage(Component.literal("SEALED ACCESS // Lock status: RED. Incident authorization missing."), false);
+            } else if (evidence < 3) {
+                event.getEntity().displayClientMessage(Component.literal("SEALED ACCESS // Three indexed clues required for access."), false);
+            } else {
+                var state = event.getLevel().getBlockState(event.getPos());
+                boolean opening = !state.getValue(ArchiveDoorBlock.OPEN);
+                event.getLevel().setBlock(event.getPos(), state.setValue(ArchiveDoorBlock.OPEN, opening), 3);
+                boolean firstSealRecord = catalogueEvidence(data, DOOR_FLAG);
+                event.getEntity().displayClientMessage(Component.literal(opening
+                        ? "SEALED ACCESS // Door opened. " + (firstSealRecord ? "EVIDENCE 07 recorded: the seal is older than the building." : "The corridor beyond is silent.")
+                        : "SEALED ACCESS // Door closed. The lock engages from the other side."), false);
+                event.getLevel().playSound(null, event.getPos(), opening ? SoundEvents.IRON_DOOR_OPEN : SoundEvents.IRON_DOOR_CLOSE,
+                        SoundSource.BLOCKS, 1.0F, opening ? 0.7F : 0.6F);
+            }
+            event.setCanceled(true);
+        } else if (block.equals(ModBlocks.OBSERVATION_GLASS.get())) {
             if (phase >= 2 && catalogueEvidence(data, GLASS_FLAG)) {
                 event.getEntity().displayClientMessage(Component.literal("EVIDENCE 05 // Observation glass recorded. Reflection timing is impossible."), false);
                 event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.65F);
