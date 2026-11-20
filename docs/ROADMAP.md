@@ -18,13 +18,15 @@
 
 ## Milestone 3 — Evidence and ARG
 - [x] Field recorder with six narrative messages
-- [x] Evidence index prototype (five fragments)
+- [x] Distinct evidence catalogue (four item types + three environmental clues)
 - [x] Phase-gated tape playback
 - [x] Memory terminal interaction
 - [x] EMF reader with phase-sensitive readings
 - [x] Sealed access and rift monitor interactions
-- [ ] Journal UI and evidence-specific clues
+- [x] Conditional Rift Key ending flag (six tapes + five distinct clues)
+- [ ] Journal UI with readable clue records
 - [ ] Persistent progression graph and quest objectives
+- [ ] Reset/test command for progression
 
 ## Milestone 4 — Horror systems
 - [ ] Sanity / anomaly pressure model
