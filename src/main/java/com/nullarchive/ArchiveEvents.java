@@ -453,16 +453,14 @@ public final class ArchiveEvents {
                     event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.8F, 0.55F);
                 }
             } else {
-                if (phase >= 2 && catalogueEvidence(data, TERMINAL_FLAG)) {
-                    event.getEntity().displayClientMessage(Component.literal("EVIDENCE 06 // Terminal memory recorded. The subject field is blank."), false);
-                    event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.8F);
-                }
                 evidence = evidenceCount(data);
                 String output = phase < 2
                         ? "MEMORY TERMINAL // ACCESS DENIED. Complete the intake recordings."
-                        : evidence < 1
-                        ? "MEMORY TERMINAL // Empty index. Catalogue evidence before querying."
-                        : "MEMORY TERMINAL // Indexed fragments: " + evidence + " // Current tape: " + phase + "/6 // Query result: SUBJECT NOT FOUND.";
+                        : evidence < 2
+                        ? "MEMORY TERMINAL // Empty index. Catalogue at least two clues before querying."
+                        : data.getInt(EVIDENCE_FLAGS_KEY) != 0 && (data.getInt(EVIDENCE_FLAGS_KEY) & TERMINAL_FLAG) != 0
+                        ? "MEMORY TERMINAL // /SUBJECT/NULL/EXIT_LOG.txt // The file timestamp is tomorrow. Use a cartridge to query the archive."
+                        : "MEMORY TERMINAL // Indexed fragments: " + evidence + " // Cartridge interface required. Query locked.";
                 event.getEntity().displayClientMessage(Component.literal(output), false);
             }
         } else if (block.equals(ModBlocks.RIFT_FRAME.get())) {
