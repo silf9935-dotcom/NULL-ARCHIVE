@@ -6,44 +6,62 @@ A psychological-horror / ARG Minecraft mod for **Minecraft 1.21.1**, **Minecraft
 
 ## Development status
 
-**Current status: early playable mechanics prototype.** The project has registered archive blocks/items, six server-side recorder phases, persistent player progression, EMF/anomaly responses, distinct evidence cataloguing, phase-gated terminal/door/rift interactions, and a conditional ending flag. It does not yet include a generated facility, custom art/audio, journal GUI, cinematic ending, or a verified release build.
+**Playable mechanics prototype — not a release build.** The mod currently has a six-stage field recorder progression, persistent player investigation data, eight distinct clue types, a command-built seven-room facility, a text field journal, a directional EMF scanner, anomaly interactions, phase-gated access, and a conditional ending. Core mechanics are implemented server-side, but gameplay/build verification has not been completed in this environment.
 
-### Target experience
-- Approximately 2 hours for a first playthrough
-- Six progression phases, with discoveries that change how earlier evidence is interpreted
-- Environmental storytelling, anomalous recordings, terminals, spatial anomalies, and controlled hallucination effects
-- Cinematic pacing without making the core progression depend on random chance
+Not yet implemented: automatic world generation, custom textures/models beyond placeholders, a graphical journal, a cinematic ending, and a polished audio/visual experience.
 
 ## Requirements
-- Java 21 (JDK, not just a JRE)
-- Gradle 8.8 or the included Gradle wrapper
+
+- Java 21 JDK
+- Gradle 8.8 installed locally (the repository currently has no Gradle wrapper)
 - Minecraft Forge 52.x for Minecraft 1.21.1
 
 ## Build
+
+Run from the project root:
+
 ```bash
 gradle build
 ```
-On Windows:
-```bat
-gradle build
-```
 
-The distributable JAR is written to `build/libs/`. A Gradle wrapper will be added after the first CI-validated build; until then, run `gradle build` with Gradle 8.8 installed.
+The distributable JAR should be written to `build/libs/`. Build success is not currently verified; please report compiler or runtime errors as issues.
+
+## Quick start
+
+1. Launch a Forge 1.21.1 world with the mod installed.
+2. Use `/nullarchive generate` (operator permission required) in an open area to build the test facility around you. **This replaces blocks in its footprint and drops test items; use a disposable world.**
+3. Start in Intake and use the Field Recorder. Follow the six recording phases and catalogue clues.
+4. Use `/archivejournal` to review tape progress, all eight clue slots, and the ending requirements.
+5. Explore with the EMF Reader. It reports nearby phase-unlocked signals and rough direction; scanning does not count as evidence.
+6. Complete all six recordings and collect at least five unique clues. Use the Rift Key on the Rift Frame to trigger the prototype ending.
+
+Admin commands:
+- `/nullarchive generate` — create the seven-room test facility at your location.
+- `/nullarchive status` — show your current progression and ending state.
+- `/nullarchive reset` — reset player investigation progress and event triggers. World blocks are not restored.
+- `/archivejournal` — player-accessible investigation journal.
 
 ## Prototype mechanics
-- Recorder progression: six tapes, with evidence gates on later playback.
-- Evidence index: four item types and three environmental clues; each clue counts once per player.
-- Persistent player data and legacy evidence-counter migration.
-- Phase-gated interactions for the memory terminal, sealed door, rift frame, anomaly blocks, and investigation tools.
-- Rift Key ending interaction requires all six tapes and at least five distinct evidence clues.
+
+- Six recordings with phase and evidence progression gates.
+- Eight distinct clue flags with legacy evidence-counter migration.
+- Command-built seven-room facility with curated item drops and room landmarks.
+- Persistent environmental changes and one-time proximity anomalies, including stalking cues and false passages.
+- Intake log with a delayed reveal, phase-specific archive inscriptions, and a hidden Records clue.
+- Memory terminal requires a cartridge and two indexed clues; its query can register a clue.
+- Sealed Door requires phase 4, three clues, and an Archive Key on first access.
+- EMF scanner reads authored landmarks and nearby anomaly blocks, with signal strength and rough direction.
+- Rift scan and ending interaction; ending requires all six tapes and at least five of eight clues.
 
 See [playtest instructions](docs/PLAYTEST.md), [phase progression](docs/PHASE_PROGRESSION.md), and [facility blueprint](docs/FACILITY_LAYOUT.md).
 
 ## Project layout
+
 - `src/main/java` — mod code
 - `src/main/resources/META-INF/mods.toml` — Forge metadata
-- `src/main/resources/assets/nullarchive` — language, models, sounds, and textures
-- `docs/` — design and implementation notes
+- `src/main/resources/assets/nullarchive` — language, models, sound definitions, and textures
+- `docs/` — design, playtest, and implementation notes
 
 ## License
+
 All rights reserved unless a license is added to this repository.
