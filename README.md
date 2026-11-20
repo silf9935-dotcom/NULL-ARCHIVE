@@ -6,7 +6,7 @@ A psychological-horror / ARG Minecraft mod for **Minecraft 1.21.1**, **Minecraft
 
 ## Development status
 
-This repository is being built in staged, testable milestones. The initial commit establishes the Forge project and technical conventions; gameplay systems will be added incrementally.
+**Current status: early playable mechanics prototype.** The project has registered archive blocks/items, six server-side recorder phases, persistent player progression, EMF/anomaly responses, distinct evidence cataloguing, phase-gated terminal/door/rift interactions, and a conditional ending flag. It does not yet include a generated facility, custom art/audio, journal GUI, cinematic ending, or a verified release build.
 
 ### Target experience
 - Approximately 2 hours for a first playthrough
@@ -29,6 +29,15 @@ gradle build
 ```
 
 The distributable JAR is written to `build/libs/`. A Gradle wrapper will be added after the first CI-validated build; until then, run `gradle build` with Gradle 8.8 installed.
+
+## Prototype mechanics
+- Recorder progression: six tapes, with evidence gates on later playback.
+- Evidence index: four item types and three environmental clues; each clue counts once per player.
+- Persistent player data and legacy evidence-counter migration.
+- Phase-gated interactions for the memory terminal, sealed door, rift frame, anomaly blocks, and investigation tools.
+- Rift Key ending interaction requires all six tapes and at least five distinct evidence clues.
+
+See [playtest instructions](docs/PLAYTEST.md), [phase progression](docs/PHASE_PROGRESSION.md), and [facility blueprint](docs/FACILITY_LAYOUT.md).
 
 ## Project layout
 - `src/main/java` — mod code
