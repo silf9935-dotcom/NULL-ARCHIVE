@@ -146,6 +146,63 @@ public final class ArchiveEvents {
                 if (wall && (room == 3 || room == 4) && z != 0 && z != 8)
                     level.setBlock(p.above(), glass, 3);
             }
+            // Give each room a distinct visual landmark instead of a uniform empty shell.
+            switch (room) {
+                case 0 -> {
+                    // Intake: desk-like archive counter and a narrow waiting alcove.
+                    for (int x = 2; x <= 6; x++) level.setBlock(origin.offset(sx + x, 1, 2), concrete, 3);
+                    for (int x = 2; x <= 6; x++) level.setBlock(origin.offset(sx + x, 2, 2), air, 3);
+                    level.setBlock(origin.offset(sx + 2, 1, 6), glass, 3);
+                    level.setBlock(origin.offset(sx + 6, 1, 6), glass, 3);
+                }
+                case 1 -> {
+                    // Basement: low dark ceiling strips.
+                    for (int x = 1; x <= 7; x += 2) {
+                        level.setBlock(origin.offset(sx + x, 3, 2), glass, 3);
+                        level.setBlock(origin.offset(sx + x, 3, 6), glass, 3);
+                    }
+                }
+                case 2 -> {
+                    // Observation: glass-lined side walls and a central divider.
+                    for (int y = 1; y <= 3; y++) {
+                        for (int z = 2; z <= 6; z++) {
+                            level.setBlock(origin.offset(sx + 1, y, z), glass, 3);
+                            level.setBlock(origin.offset(sx + 7, y, z), glass, 3);
+                        }
+                    }
+                    for (int z = 2; z <= 6; z++) level.setBlock(origin.offset(sx + 4, 2, z), concrete, 3);
+                }
+                case 3 -> {
+                    // Incident Lab: raised tile islands and an interrupted floor path.
+                    for (int x = 2; x <= 6; x++) {
+                        if (x != 4) level.setBlock(origin.offset(sx + x, 0, 2), corrupted, 3);
+                        level.setBlock(origin.offset(sx + x, 0, 6), staticState, 3);
+                    }
+                    level.setBlock(origin.offset(sx + 4, 0, 4), concrete, 3);
+                }
+                case 4 -> {
+                    // Records room: shelves represented by concrete columns.
+                    for (int x : new int[] {2, 4, 6}) for (int z : new int[] {2, 6}) {
+                        for (int y = 1; y <= 2; y++) level.setBlock(origin.offset(sx + x, y, z), concrete, 3);
+                    }
+                }
+                case 5 -> {
+                    // Sealed Wing: warning stripe pattern at the threshold.
+                    for (int x = 2; x <= 6; x++) level.setBlock(origin.offset(sx + x, 0, 2), x % 2 == 0 ? corrupted : tile, 3);
+                    level.setBlock(origin.offset(sx + 4, 1, 2), nullState, 3);
+                }
+                case 6 -> {
+                    // Rift Chamber: a dark cross-shaped floor and frame accents.
+                    for (int x = 2; x <= 6; x++) {
+                        level.setBlock(origin.offset(sx + x, 0, 4), corrupted, 3);
+                        level.setBlock(origin.offset(sx + 4, 0, x), corrupted, 3);
+                    }
+                    for (int y = 1; y <= 3; y++) {
+                        level.setBlock(origin.offset(sx + 2, y, 2), glass, 3);
+                        level.setBlock(origin.offset(sx + 6, y, 6), nullState, 3);
+                    }
+                }
+            }
             if (room < 6) {
                 for (int y = 1; y <= 3; y++) {
                     level.setBlock(origin.offset(sx + 8, y, 4), air, 3);
