@@ -42,7 +42,7 @@ public final class ModItems {
         return ITEMS.register(name, () -> new Item(new Item.Properties()));
     }
 
-    private static RegistryObject<Item> blockItem(String name, RegistryObject<net.minecraft.world.level.block.Block> block) {
+    private static <T extends net.minecraft.world.level.block.Block> RegistryObject<Item> blockItem(String name, RegistryObject<T> block) {
         return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
     }
 
