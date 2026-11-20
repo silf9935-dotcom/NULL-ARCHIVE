@@ -13,7 +13,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 7. Right-click Static Block, Null Block, or Corrupted Stone after the second tape to trigger escalating anomaly messages. Right-click Archive Tile or Archive Concrete once per tape phase to discover phase-specific inscriptions; each phase's inscription is shown only once per player.
 8. Right-click the EMF Reader, Null Shard, Archive Key, Rift Key, and Terminal Cartridge to hear their current prototype responses.
 9. After generating the facility, proximity events trigger in Observation, Basement, Incident Lab, Sealed Wing, and Rift Chamber as you advance phases. Each event is once per generated layout.
-10. For the ending: play all six tapes, catalogue at least five distinct clues out of seven, then right-click the Rift Frame while holding the Rift Key. In creative mode the key is not consumed.
+10. At phase 5 or later, right-click the Rift Frame once for a one-time resonance scan; it adds narrative feedback but does not count as evidence. For the ending: play all six tapes, catalogue at least five distinct clues out of seven, then right-click the Rift Frame while holding the Rift Key. In creative mode the key is not consumed.
 
 ## Admin test commands
 
