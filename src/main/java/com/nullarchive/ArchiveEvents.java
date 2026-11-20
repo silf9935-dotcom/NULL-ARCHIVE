@@ -134,6 +134,7 @@ public final class ArchiveEvents {
                 event.getEntity().displayClientMessage(Component.literal("EVIDENCE 06 // Terminal memory recorded. The subject field is blank."), false);
                 event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.8F);
             }
+            evidence = evidenceCount(data);
             String output = phase < 2
                     ? "MEMORY TERMINAL // ACCESS DENIED. Complete the intake recordings."
                     : evidence < 1
@@ -145,6 +146,7 @@ public final class ArchiveEvents {
                 event.getEntity().displayClientMessage(Component.literal("EVIDENCE 07 // Door seal recorded. The seal is older than the building."), false);
                 event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.5F);
             }
+            evidence = evidenceCount(data);
             String output = phase < 4
                     ? "SEALED ACCESS // Lock status: RED. Incident authorization missing."
                     : evidence < 3
@@ -162,7 +164,7 @@ public final class ArchiveEvents {
                     event.getEntity().displayClientMessage(Component.literal("NULL ARCHIVE // The breach is sealed. There is nothing left to unlock."), false);
                 } else if (phase < 6 || evidence < 5) {
                     event.getEntity().displayClientMessage(Component.literal(
-                            "RIFT LOCK // Final tape and all five evidence fragments required. Progress: " + phase + "/6 // Evidence: " + evidence + "/7"), false);
+                            "RIFT LOCK // Final tape and at least five of seven clues required. Progress: " + phase + "/6 // Evidence: " + evidence + "/7"), false);
                 } else {
                     data.putBoolean("nullarchive_ending_complete", true);
                     if (!event.getEntity().getAbilities().instabuild) held.shrink(1);
