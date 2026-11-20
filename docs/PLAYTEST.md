@@ -1,6 +1,6 @@
 # NULL ARCHIVE — Prototype Playtest
 
-This is an early mechanics prototype. It includes a conditional ending interaction, but not the generated archive map, custom textures, or a journal GUI.
+This is an early mechanics prototype. It includes a command-built seven-room archive layout and a conditional ending interaction, but not automatic world generation, custom textures, or a journal GUI.
 
 ## Quick test (creative mode)
 
@@ -15,6 +15,7 @@ This is an early mechanics prototype. It includes a conditional ending interacti
 
 ## Admin test commands
 
+- `/nullarchive generate` — builds a compact seven-room facility around the player's position (permission level 2). Run in an open area; the generator replaces blocks within its footprint. It is a command-built prototype, not automatic world generation. Start in Intake and follow the corridor.
 - `/nullarchive status` — shows tape phase, evidence count, anomaly count, and ending state (permission level 2).
 - `/nullarchive reset` — resets player progression for a fresh test. It does not reset world blocks or the door's physical state.
 
