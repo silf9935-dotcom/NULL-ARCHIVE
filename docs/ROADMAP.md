@@ -23,6 +23,7 @@
 - [x] Memory terminal interaction
 - [x] EMF reader with phase-sensitive readings
 - [x] Sealed access and rift monitor interactions
+- [x] Stateful sealed door with phase/evidence gate, collision, and open/close sound
 - [x] Conditional Rift Key ending flag (six tapes + five distinct clues)
 - [ ] Journal UI with readable clue records
 - [ ] Persistent progression graph and quest objectives
