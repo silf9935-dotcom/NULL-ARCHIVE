@@ -447,6 +447,7 @@ public final class ArchiveEvents {
             return;
         }
         BlockPos scanOrigin = player.blockPosition();
+        BlockPos scanTarget = targets[bestIndex];
         // Detect actual anomalous blocks as well as authored landmarks, so mutations remain discoverable.
         if (phase >= 2) {
             for (int dx = -8; dx <= 8; dx++) for (int dy = -8; dy <= 8; dy++) for (int dz = -8; dz <= 8; dz++) {
@@ -455,18 +456,18 @@ public final class ArchiveEvents {
                 if (distance > 64 || distance >= bestDistance) continue;
                 var scannedBlock = event.getLevel().getBlockState(scanPos).getBlock();
                 if (scannedBlock.equals(ModBlocks.NULL_BLOCK.get())) {
-                    bestDistance = distance; bestIndex = 7;
+                    bestDistance = distance; bestIndex = 7; scanTarget = scanPos;
                 } else if (scannedBlock.equals(ModBlocks.STATIC_BLOCK.get())) {
-                    bestDistance = distance; bestIndex = 3;
+                    bestDistance = distance; bestIndex = 3; scanTarget = scanPos;
                 } else if (scannedBlock.equals(ModBlocks.CORRUPTED_STONE.get())) {
-                    bestDistance = distance; bestIndex = 2;
+                    bestDistance = distance; bestIndex = 2; scanTarget = scanPos;
                 } else if (scannedBlock.equals(ModBlocks.BLACK_GLASS.get())) {
-                    bestDistance = distance; bestIndex = 1;
+                    bestDistance = distance; bestIndex = 1; scanTarget = scanPos;
                 }
             }
         }
         int strength = bestDistance <= 4 ? 5 : bestDistance <= 9 ? 4 : bestDistance <= 16 ? 3 : bestDistance <= 36 ? 2 : 1;
-        BlockPos target = bestIndex == 7 ? scanOrigin : targets[bestIndex];
+        BlockPos target = scanTarget;
         String direction = target.getX() > scanOrigin.getX() ? "ahead"
                 : target.getX() < scanOrigin.getX() ? "behind"
                 : target.getY() > scanOrigin.getY() ? "above"
