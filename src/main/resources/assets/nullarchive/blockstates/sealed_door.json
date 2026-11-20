@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "open=false": {
       "model": "nullarchive:block/sealed_door"
+    },
+    "open=true": {
+      "model": "nullarchive:block/sealed_door_open"
     }
   }
 }
