@@ -16,6 +16,22 @@ public final class ArchiveEvents {
     private static final String PHASE_KEY = "nullarchive_phase";
     private static final String EVIDENCE_KEY = "nullarchive_evidence";
     private static final String ANOMALY_KEY = "nullarchive_anomaly";
+    private static final String EVIDENCE_FLAGS_KEY = "nullarchive_evidence_flags";
+    private static final int EVIDENCE_TAPE_FLAG = 1, PHOTO_FLAG = 2, MEMORY_FLAG = 4, DOCUMENT_FLAG = 8;
+    private static final int GLASS_FLAG = 16, TERMINAL_FLAG = 32, DOOR_FLAG = 64;
+
+    private static int evidenceCount(CompoundTag data) {
+        int flags = data.getInt(EVIDENCE_FLAGS_KEY);
+        return flags == 0 ? Math.min(data.getInt(EVIDENCE_KEY), 5) : Integer.bitCount(flags);
+    }
+
+    private static boolean catalogueEvidence(CompoundTag data, int flag) {
+        int flags = data.getInt(EVIDENCE_FLAGS_KEY);
+        if ((flags & flag) != 0) return false;
+        data.putInt(EVIDENCE_FLAGS_KEY, flags | flag);
+        data.putInt(EVIDENCE_KEY, evidenceCount(data));
+        return true;
+    }
 
     private static final String[] PHASE_MESSAGES = {
             "TAPE 01 // INTAKE: The lights are on. Nobody signed the visitor log.",
@@ -61,14 +77,15 @@ public final class ArchiveEvents {
                 && !stack.is(ModItems.MEMORY_FRAGMENT.get()) && !stack.is(ModItems.SEALED_DOCUMENT.get())) return;
 
         CompoundTag data = event.getEntity().getPersistentData();
-        int evidence = evidenceCount(data);
-        if (evidence >= 5) {
-            event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Archive limit reached."), false);
+        int flag = stack.is(ModItems.EVIDENCE_TAPE.get()) ? EVIDENCE_TAPE_FLAG
+                : stack.is(ModItems.DAMAGED_PHOTOGRAPH.get()) ? PHOTO_FLAG
+                : stack.is(ModItems.MEMORY_FRAGMENT.get()) ? MEMORY_FLAG : DOCUMENT_FLAG;
+        if (!catalogueEvidence(data, flag)) {
+            event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // This item is already catalogued. Duplicate record ignored."), false);
             return;
         }
-        data.putInt(EVIDENCE_KEY, evidence + 1);
         stack.shrink(1);
-        event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Fragment catalogued: " + (evidence + 1) + "/5"), false);
+        event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Unique fragment catalogued: " + evidenceCount(data) + "/7"), false);
         event.getLevel().playSound(null, event.getEntity().blockPosition(),
                 ModSounds.ARCHIVE_PULSE.get(), SoundSource.PLAYERS, 0.65F, 1.0F);
     }
@@ -93,9 +110,22 @@ public final class ArchiveEvents {
         var block = event.getLevel().getBlockState(event.getPos()).getBlock();
         CompoundTag data = event.getEntity().getPersistentData();
         int phase = data.getInt(PHASE_KEY);
-        int evidence = data.getInt(EVIDENCE_KEY);
+        int evidence = evidenceCount(data);
 
-        if (block.equals(ModBlocks.MEMORY_BLOCK.get())) {
+        if (block.equals(ModBlocks.OBSERVATION_GLASS.get())) {
+            if (phase >= 2 && catalogueEvidence(data, GLASS_FLAG)) {
+                event.getEntity().displayClientMessage(Component.literal("EVIDENCE 05 // Observation glass recorded. Reflection timing is impossible."), false);
+                event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.65F);
+            } else if (phase < 2) {
+                event.getEntity().displayClientMessage(Component.literal("OBSERVATION // Nothing unusual. Complete the first two recordings."), false);
+            } else {
+                event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Observation glass clue already recorded."), false);
+            }
+        } else if (block.equals(ModBlocks.MEMORY_BLOCK.get())) {
+            if (phase >= 2 && catalogueEvidence(data, TERMINAL_FLAG)) {
+                event.getEntity().displayClientMessage(Component.literal("EVIDENCE 06 // Terminal memory recorded. The subject field is blank."), false);
+                event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.8F);
+            }
             String output = phase < 2
                     ? "MEMORY TERMINAL // ACCESS DENIED. Complete the intake recordings."
                     : evidence < 1
@@ -103,6 +133,10 @@ public final class ArchiveEvents {
                     : "MEMORY TERMINAL // Indexed fragments: " + evidence + " // Current tape: " + phase + "/6 // Query result: SUBJECT NOT FOUND.";
             event.getEntity().displayClientMessage(Component.literal(output), false);
         } else if (block.equals(ModBlocks.SEALED_DOOR.get())) {
+            if (phase >= 4 && catalogueEvidence(data, DOOR_FLAG)) {
+                event.getEntity().displayClientMessage(Component.literal("EVIDENCE 07 // Door seal recorded. The seal is older than the building."), false);
+                event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.5F);
+            }
             String output = phase < 4
                     ? "SEALED ACCESS // Lock status: RED. Incident authorization missing."
                     : evidence < 3
@@ -192,7 +226,7 @@ public final class ArchiveEvents {
                     ? "RIFT KEY // It is vibrating. The breach is not ready."
                     : "RIFT KEY // The metal bends toward the rift. Do not turn it.";
         } else if (stack.is(ModItems.TERMINAL_CARTRIDGE.get())) {
-            response = event.getEntity().getPersistentData().getInt(EVIDENCE_KEY) < 2
+            response = evidenceCount(event.getEntity().getPersistentData()) < 2
                     ? "CARTRIDGE // DATA CORRUPTED. More evidence required."
                     : "CARTRIDGE // Recovered directory: /SUBJECT/NULL/EXIT_LOG.txt";
         } else return;
