@@ -210,7 +210,7 @@ public final class ArchiveEvents {
         if (event.getLevel().isClientSide() || !event.getItemStack().is(ModItems.NULL_SHARD.get())) return;
         CompoundTag data = event.getEntity().getPersistentData();
         int phase = data.getInt(PHASE_KEY);
-        int evidence = data.getInt(EVIDENCE_KEY);
+        int evidence = evidenceCount(data);
         String response = phase < 4
                 ? "NULL SHARD // Cold. It refuses to resonate before the incident."
                 : evidence < 3
