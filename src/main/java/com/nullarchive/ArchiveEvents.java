@@ -76,7 +76,7 @@ public final class ArchiveEvents {
                 .then(Commands.literal("generate").executes(context -> {
                     Player player = context.getSource().getPlayerOrException();
                     ServerLevel level = context.getSource().getLevel();
-                    BlockPos origin = player.blockPosition().offset(4, 0, 4);
+                    BlockPos origin = player.blockPosition().offset(0, -1, 0);
                     generateFacility(level, origin);
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Facility generated. Start in Intake and follow the corridor."), false);
                     return 1;
@@ -133,7 +133,7 @@ public final class ArchiveEvents {
                     level.setBlock(origin.offset(nextStart, y, 4), air, 3);
             }
         }
-        level.setBlock(origin.offset(4, 1, 4), memory, 3);
+        level.setBlock(origin.offset(2, 1, 2), memory, 3);
         level.setBlock(origin.offset(15, 1, 4), observation, 3);
         level.setBlock(origin.offset(26, 1, 4), corrupted, 3);
         level.setBlock(origin.offset(37, 1, 4), staticState, 3);
