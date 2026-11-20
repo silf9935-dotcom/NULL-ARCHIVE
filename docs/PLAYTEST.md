@@ -4,7 +4,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 
 ## Quick test (creative mode)
 
-1. Enter a world and open the NULL ARCHIVE creative tab.
+1. Enter a world and open the NULL ARCHIVE creative tab. Use `/archivejournal` at any time to view tape progress, the eight distinct clue slots, and ending requirements.
 2. Take the Field Recorder. Right-click to play tapes in order.
 3. At the Intake counter, right-click the concrete block at the counter's center (relative position +4, +1, +2 from the generated facility origin) after tape 1 to reveal a one-time visitor log. The entry changes after tape 3; if discovered earlier, return after tape 3 for the one-time reveal.
 4. Right-click Evidence Tape, Damaged Photograph, Memory Fragment, and Sealed Document to catalogue each item type once. Duplicates do not increase progress; the first catalogue consumes one item.
@@ -20,7 +20,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 ## Admin test commands
 
 - `/nullarchive generate` — builds a compact seven-room facility around the player (permission level 2). Run in an open area; it replaces blocks in its footprint and drops curated progression items. Rooms now have landmarks: Intake counter, Basement ceiling strips, Observation glass divider, Incident Lab anomaly floor, Records shelves, Sealed Wing warning floor, and Rift Chamber corrupted cross. It is a command-built prototype, not automatic world generation. Start in Intake and follow the corridor. The two-block sealed threshold is in the connector before Rift Chamber; first access requires tape 4, three clues, and the Archive Key.
-- `/nullarchive status` — shows tape phase, evidence count, anomaly count, and ending state (permission level 2).
+- `/archivejournal` — player-accessible field journal: recording progress, distinct clue checklist, and ending requirements.\n- `/nullarchive status` — shows tape phase, evidence count, anomaly count, and ending state (permission level 2).
 - `/nullarchive reset` — resets player progression and per-player anomaly/stalking triggers for a fresh test. It does not reset world blocks or the door's physical state.
 
 - The generator places Field Recorder, EMF Reader, evidence items, Terminal Cartridge, Archive Key, Rift Key, and Null Shard as item drops at room landmarks. Running the command again duplicates these drops. Ambient events are proximity-triggered, phase-gated, and each fires once per generation. From tape 3 onward, a phase-specific stalking cue can play a chime behind the player and report footsteps in the empty corridor; it fires once per phase while inside the facility. Observation permanently changes a wall section to black glass; Basement and Incident Lab mutate floor patches into anomaly blocks; the Sealed Wing event turns a side-wall section into black glass with a Null Block embedded in it (a false passage); the Rift event adds a Null Block. These effects persist in the world. Playing tape 6 also permanently rewrites the Rift Chamber: Null Blocks breach the wall and corrupted stone spreads across the floor.
