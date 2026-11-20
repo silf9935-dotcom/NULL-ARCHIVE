@@ -89,7 +89,7 @@ public final class ArchiveEvents {
                     playerData.remove("nullarchive_ambient_static");
                     playerData.remove("nullarchive_ambient_gate");
                     playerData.remove("nullarchive_ambient_rift");
-                    playerData.remove("nullarchive_ambient_cooldown");
+                    playerData.remove("nullarchive_ambient_cooldown");\n                    playerData.remove("nullarchive_random_anomaly_cooldown");
                     for (int phaseIndex = 0; phaseIndex <= 6; phaseIndex++)
                         playerData.remove("nullarchive_presence_" + phaseIndex);
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Facility generated. Start in Intake and follow the corridor."), false);
@@ -113,7 +113,7 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_ambient_static");
                     data.remove("nullarchive_ambient_gate");
                     data.remove("nullarchive_ambient_rift");
-                    data.remove("nullarchive_ambient_cooldown");
+                    data.remove("nullarchive_ambient_cooldown");\n                    data.remove("nullarchive_random_anomaly_cooldown");
                     for (int phaseIndex = 0; phaseIndex <= 6; phaseIndex++)
                         data.remove("nullarchive_presence_" + phaseIndex);
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Your investigation progress has been reset. World blocks are unchanged."), false);
@@ -484,7 +484,7 @@ public final class ArchiveEvents {
         } else if (block.equals(ModBlocks.RIFT_FRAME.get())) {
             if (phase >= 5 && !data.getBoolean("nullarchive_rift_scan")) {
                 data.putBoolean("nullarchive_rift_scan", true);
-                event.getEntity().displayClientMessage(Component.literal("RIFT SCAN // Frame resonance detected. The missing segment is not missing; it is displaced. EVIDENCE 07 is available only after the seal is opened."), false);
+                event.getEntity().displayClientMessage(Component.literal("RIFT SCAN // Frame resonance detected. The missing segment is not missing; it is displaced. Signal recorded locally, but it is not part of the evidence index."), false);
                 event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(), SoundSource.BLOCKS, 0.8F, 0.45F);
             }
             var held = event.getItemStack();
