@@ -433,6 +433,24 @@ public final class ArchiveEvents {
                 if (phase >= 5) event.getLevel().playSound(null, event.getPos(),
                         ModSounds.SIGNAL_DISTORTION.get(), SoundSource.BLOCKS, 1.0F, 0.5F);
             }
+        } else if (block.equals(ModBlocks.ARCHIVE_TILE.get()) || block.equals(ModBlocks.ARCHIVE_CONCRETE.get())) {
+            if (phase > 0) {
+                String inscriptionKey = "nullarchive_inscription_" + phase;
+                if (!data.getBoolean(inscriptionKey)) {
+                    String inscription = switch (phase) {
+                        case 1 -> "INTAKE // The visitor log has one entry. The name field is empty.";
+                        case 2 -> "BASEMENT // Maintenance note: footsteps detected below the lowest floor.";
+                        case 3 -> "OBSERVATION // Do not trust reflections recorded after midnight.";
+                        case 4 -> "INCIDENT // The door was sealed before the incident was reported.";
+                        case 5 -> "BREACH // Containment is intact. The room is not.";
+                        default -> "NULL // This inscription is dated tomorrow. It is signed with your name.";
+                    };
+                    data.putBoolean(inscriptionKey, true);
+                    event.getEntity().displayClientMessage(Component.literal(inscription), false);
+                    event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(),
+                            SoundSource.BLOCKS, 0.45F, 0.55F + phase * 0.08F);
+                }
+            }
         }
     }
     @SubscribeEvent
