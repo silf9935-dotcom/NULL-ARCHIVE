@@ -488,7 +488,7 @@ public final class ArchiveEvents {
                 if (phase >= 5) event.getLevel().playSound(null, event.getPos(),
                         ModSounds.SIGNAL_DISTORTION.get(), SoundSource.BLOCKS, 1.0F, 0.5F);
             }
-        } else if (block.equals(ModBlocks.ARCHIVE_TILE.get()) || block.equals(ModBlocks.ARCHIVE_CONCRETE.get())) {
+        } else if (block.equals(ModBlocks.ARCHIVE_TILE.get())) {
             if (phase > 0) {
                 String inscriptionKey = "nullarchive_inscription_" + phase;
                 if (!data.getBoolean(inscriptionKey)) {
@@ -507,9 +507,10 @@ public final class ArchiveEvents {
                 } else {
                     event.getEntity().displayClientMessage(Component.literal("ARCHIVE // The surface is cold. The inscription has not changed."), false);
                 }
+            } else {
+                event.getEntity().displayClientMessage(Component.literal("ARCHIVE // Intake record locked. Activate the field recorder."), false);
             }
         } else if (block.equals(ModBlocks.ARCHIVE_CONCRETE.get())) {
-            // Concrete archive fixtures behave as inert surfaces.
             event.getEntity().displayClientMessage(Component.literal("ARCHIVE // Cold concrete. No readable inscription."), false);
         }
     }
