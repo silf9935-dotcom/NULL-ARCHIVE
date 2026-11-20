@@ -6,6 +6,13 @@ import com.nullarchive.registry.ModSounds;
 import com.nullarchive.block.ArchiveDoorBlock;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -53,6 +60,33 @@ public final class ArchiveEvents {
     };
 
     private ArchiveEvents() {}
+
+    @SubscribeEvent
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("nullarchive")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.literal("status").executes(context -> {
+                    Player player = context.getSource().getPlayerOrException();
+                    CompoundTag data = player.getPersistentData();
+                    player.displayClientMessage(Component.literal("NULL ARCHIVE // Phase " + data.getInt(PHASE_KEY)
+                            + "/6 // Evidence " + evidenceCount(data) + "/7 // Anomaly " + data.getInt(ANOMALY_KEY)
+                            + " // Ending " + (data.getBoolean("nullarchive_ending_complete") ? "COMPLETE" : "INCOMPLETE")), false);
+                    return 1;
+                }))
+                .then(Commands.literal("reset").executes(context -> {
+                    Player player = context.getSource().getPlayerOrException();
+                    CompoundTag data = player.getPersistentData();
+                    data.remove(PHASE_KEY);
+                    data.remove(EVIDENCE_KEY);
+                    data.remove(EVIDENCE_FLAGS_KEY);
+                    data.remove(ANOMALY_KEY);
+                    data.remove("nullarchive_ending_complete");
+                    data.remove("nullarchive_door_unlocked");
+                    player.displayClientMessage(Component.literal("NULL ARCHIVE // Your investigation progress has been reset. World blocks are unchanged."), false);
+                    return 1;
+                })));
+    }
+
 
     @SubscribeEvent
     public static void onRecorderUse(PlayerInteractEvent.RightClickItem event) {
