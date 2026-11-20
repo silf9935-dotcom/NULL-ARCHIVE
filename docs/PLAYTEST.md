@@ -8,7 +8,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 2. Take the Field Recorder. Right-click to play tapes in order.
 3. Right-click Evidence Tape, Damaged Photograph, Memory Fragment, and Sealed Document to catalogue each item type once. Duplicates do not increase progress; the first catalogue consumes one item.
 4. Use the recorder again. Later tapes require evidence.
-5. Right-click Observation Glass after tape 2 to record a clue. Right-click Memory Block after tape 2 to record a separate terminal clue and read its output.
+5. Right-click Observation Glass after tape 2 to record a clue. Right-click Memory Block after tape 2 to record a separate terminal clue and read its output. With at least two indexed clues, use a Terminal Cartridge on Memory Block to query `/SUBJECT/NULL/EXIT_LOG.txt`; the cartridge is consumed outside creative.
 6. After tape 4 and three clues, use Archive Key on Sealed Door for the first unlock (consumed outside creative), then right-click to open/close it physically. The first access also catalogues the seal clue. Before the gate, it reports denied access.
 7. Right-click Static Block, Null Block, or Corrupted Stone after the second tape to trigger escalating anomaly messages.
 8. Right-click the EMF Reader, Null Shard, Archive Key, Rift Key, and Terminal Cartridge to hear their current prototype responses.
