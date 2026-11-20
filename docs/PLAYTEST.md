@@ -6,6 +6,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 
 1. Enter a world and open the NULL ARCHIVE creative tab.
 2. Take the Field Recorder. Right-click to play tapes in order.
+3. At the Intake counter, right-click the concrete block at the counter's center (relative position +4, +1, +2 from the generated facility origin) after tape 1 to reveal a one-time visitor log. The entry changes after tape 3.
 3. Right-click Evidence Tape, Damaged Photograph, Memory Fragment, and Sealed Document to catalogue each item type once. Duplicates do not increase progress; the first catalogue consumes one item.
 4. Use the recorder again. Later tapes require evidence.
 5. Right-click Observation Glass after tape 2 to record a clue. Right-click Memory Block after tape 2 to inspect the terminal; the query is locked without a cartridge. With at least two indexed clues, use a Terminal Cartridge on Memory Block to query `/SUBJECT/NULL/EXIT_LOG.txt` and record the terminal clue; the cartridge is consumed outside creative.
