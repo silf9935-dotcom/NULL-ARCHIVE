@@ -36,7 +36,7 @@ Build around a central spine corridor (3 blocks wide), with six zones connected 
 
 The prototype currently allows catalogue items to be used directly. In the map implementation, replace this with discovery interactions and retain the catalogue count as the progression gate.
 
-## Encounter schedule
+## Hidden Room 0\n\nAfter phase 4, the first Archive Breach can reveal Room 0 beyond the Rift Chamber. It is a 9×9 sealed glass room, with a Null Block record in the center. This room is not part of the generated baseline; reset removes it and closes the opening. Its message is a one-time secret and does not count toward the standard evidence checklist.\n\n## Encounter schedule
 
 - Intake: tutorial only, no hostile encounter.
 - Records: one environmental anomaly after tape 1.
