@@ -503,8 +503,41 @@ public final class ArchiveEvents {
             player.displayClientMessage(Component.literal("SIGNAL // Footsteps behind you. The corridor is empty."), false);
             return;
         }
+        // Once noticed, the Observer performs a three-beat stalking sequence over several seconds.
+        int observerStage = data.getInt("nullarchive_observer_stage");
+        if (observerStage > 0 && now >= data.getLong("nullarchive_observer_next")) {
+            BlockPos echoPos = new BlockPos(data.getInt("nullarchive_observer_x"),
+                    data.getInt("nullarchive_observer_y"), data.getInt("nullarchive_observer_z"));
+            if (observerStage == 1) {
+                player.level().playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME,
+                        SoundSource.AMBIENT, 0.35F, 0.35F);
+                player.displayClientMessage(Component.literal("OBSERVER // It moved. The sound is closer than the silhouette was."), false);
+                if (player.level() instanceof ServerLevel serverLevel)
+                    serverLevel.sendParticles(ParticleTypes.SMOKE, echoPos.getX() + 0.5, echoPos.getY() + 1.0,
+                            echoPos.getZ() + 0.5, 8, 0.2, 0.6, 0.2, 0.01);
+                data.putInt("nullarchive_observer_stage", 2);
+                data.putLong("nullarchive_observer_next", now + 35);
+            } else if (observerStage == 2) {
+                BlockPos closePos = pos.offset(0, 0, 2);
+                player.level().playSound(null, closePos, ModSounds.SIGNAL_DISTORTION.get(),
+                        SoundSource.AMBIENT, 0.5F, 0.3F);
+                if (player.level() instanceof ServerLevel serverLevel)
+                    serverLevel.sendParticles(ParticleTypes.PORTAL, closePos.getX() + 0.5, closePos.getY() + 1.0,
+                            closePos.getZ() + 0.5, 10, 0.3, 0.7, 0.3, 0.15);
+                player.displayClientMessage(Component.literal("OBSERVER // Something passed close enough to disturb the air. No footsteps."), false);
+                data.putInt("nullarchive_observer_stage", 3);
+                data.putLong("nullarchive_observer_next", now + 35);
+            } else {
+                player.displayClientMessage(Component.literal("OBSERVER // Signal lost. Your recorder has captured nothing."), false);
+                data.remove("nullarchive_observer_stage");
+                data.remove("nullarchive_observer_next");
+                data.remove("nullarchive_observer_x");
+                data.remove("nullarchive_observer_y");
+                data.remove("nullarchive_observer_z");
+            }
+        }
         // The Observer is a phase-gated encounter, represented by a short particle silhouette rather than a fake mob.
-        if (phase >= 3 && phase <= 6 && !data.getBoolean("nullarchive_observer_" + phase)
+        if (data.getInt("nullarchive_observer_stage") == 0 && phase >= 3 && phase <= 6 && !data.getBoolean("nullarchive_observer_" + phase)
                 && now >= data.getLong("nullarchive_observer_cooldown")
                 && pos.getX() >= origin.getX() && pos.getX() <= origin.getX() + 76
                 && pos.getZ() >= origin.getZ() && pos.getZ() <= origin.getZ() + 8
@@ -531,7 +564,7 @@ public final class ArchiveEvents {
             }
             player.level().playSound(null, observerPos, ModSounds.SIGNAL_DISTORTION.get(),
                     SoundSource.AMBIENT, 0.65F, 0.35F + phase * 0.08F);
-            data.putBoolean("nullarchive_observer_" + phase, true);
+            data.putBoolean("nullarchive_observer_" + phase, true);\n            data.putInt("nullarchive_observer_stage", 1);\n            data.putLong("nullarchive_observer_next", now + 35);\n            data.putInt("nullarchive_observer_x", observerPos.getX());\n            data.putInt("nullarchive_observer_y", observerPos.getY());\n            data.putInt("nullarchive_observer_z", observerPos.getZ());
             data.putLong("nullarchive_observer_cooldown", now + 900);
             data.putInt("nullarchive_observer_count", data.getInt("nullarchive_observer_count") + 1);
             player.displayClientMessage(Component.literal(observerMessage), false);
