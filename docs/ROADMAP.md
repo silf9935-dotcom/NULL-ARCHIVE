@@ -30,7 +30,7 @@
 - [ ] Reset/test command for progression
 
 ## Milestone 4 — Horror systems
-- [ ] Sanity / anomaly pressure model
+- [x] Archive Instability pressure model (0–100), event thresholds, breach cooldown, and non-repeating event selection\n- [ ] Sanity / anomaly pressure model
 - [ ] Hallucination events with accessibility controls
 - [ ] Client-side visual distortion effects
 - [ ] Audio cues and entity encounters
