@@ -209,7 +209,10 @@ public final class ArchiveEvents {
                     playerData.putInt("nullarchive_facility_x", origin.getX());
                     playerData.putInt("nullarchive_facility_y", origin.getY());
                     playerData.putInt("nullarchive_facility_z", origin.getZ());
-                    playerData.putString("nullarchive_facility_dimension", level.dimension().location().toString());\n                    playerData.putBoolean("nullarchive_facility_generated", true);\n                    playerData.remove("nullarchive_room_zero");
+                    playerData.putString("nullarchive_facility_dimension", level.dimension().location().toString());
+                    playerData.putBoolean("nullarchive_facility_generated", true);
+                    playerData.remove("nullarchive_room_zero");
+                    playerData.remove("nullarchive_room_zero_clue");\n                    playerData.putBoolean("nullarchive_facility_generated", true);\n                    playerData.remove("nullarchive_room_zero");
                     playerData.remove("nullarchive_ambient_obs");
                     playerData.remove("nullarchive_ambient_corrupt");
                     playerData.remove("nullarchive_ambient_static");
@@ -234,6 +237,19 @@ public final class ArchiveEvents {
                     CompoundTag data = player.getPersistentData();
                     // Restore the physical gate and ending-specific Rift mutations for a replay.
                     boolean endingWasComplete = data.getBoolean("nullarchive_ending_complete");
+                    boolean roomZeroWasOpen = data.getBoolean("nullarchive_room_zero");
+                    if (roomZeroWasOpen && data.contains("nullarchive_facility_x")
+                            && data.getString("nullarchive_facility_dimension").equals(context.getSource().getLevel().dimension().location().toString())) {
+                        ServerLevel level = context.getSource().getLevel();
+                        BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
+                                data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
+                        var air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+                        for (int x = 77; x <= 85; x++) for (int z = 0; z <= 8; z++)
+                            for (int y = 0; y <= 4; y++) level.setBlock(origin.offset(x, y, z), air, 3);
+                        var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
+                        level.setBlock(origin.offset(76, 1, 4), concrete, 3);
+                        level.setBlock(origin.offset(76, 2, 4), concrete, 3);
+                    }
                     if (data.contains("nullarchive_facility_x")
                             && data.getString("nullarchive_facility_dimension").equals(context.getSource().getLevel().dimension().location().toString())) {
                         ServerLevel level = context.getSource().getLevel();
@@ -683,6 +699,29 @@ public final class ArchiveEvents {
         event.getLevel().playSound(null, scanOrigin,
                 strength >= 4 || phase >= 5 ? ModSounds.SIGNAL_DISTORTION.get() : ModSounds.ARCHIVE_PULSE.get(),
                 SoundSource.PLAYERS, 0.65F, 0.55F + strength * 0.12F);
+    }
+
+    @SubscribeEvent
+    public static void onRoomZeroInteraction(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getLevel().isClientSide() || event.getEntity().level().isClientSide()) return;
+        Player player = event.getEntity();
+        CompoundTag data = player.getPersistentData();
+        if (!data.getBoolean("nullarchive_room_zero") || data.getBoolean("nullarchive_room_zero_clue")) return;
+        if (!data.contains("nullarchive_facility_x")
+                || !data.getString("nullarchive_facility_dimension").equals(player.level().dimension().location().toString())) return;
+        BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
+                data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
+        if (!event.getPos().equals(origin.offset(81, 1, 4))) return;
+        if (data.getInt(INSTABILITY_KEY) < 35 || data.getInt(PHASE_KEY) < 4) {
+            player.displayClientMessage(Component.literal("ROOM 0 // The block is inert. The room is not ready to be remembered."), false);
+            return;
+        }
+        data.putBoolean("nullarchive_room_zero_clue", true);
+        player.displayClientMessage(Component.literal("ROOM 0 // RECORD 000: “There were seven rooms when you arrived. There are eight when you leave. Do not count the one that knows your name.” This clue is outside the standard evidence index."), false);
+        player.level().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(), SoundSource.BLOCKS, 0.8F, 0.2F);
+        if (player.level() instanceof ServerLevel serverLevel) serverLevel.sendParticles(ParticleTypes.PORTAL,
+                event.getPos().getX() + 0.5, event.getPos().getY() + 1.0, event.getPos().getZ() + 0.5,
+                24, 0.4, 0.5, 0.4, 0.1);
     }
 
     @SubscribeEvent
