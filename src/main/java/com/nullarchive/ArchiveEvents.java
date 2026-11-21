@@ -120,8 +120,15 @@ public final class ArchiveEvents {
                     playerData.remove("nullarchive_ambient_rift");
                     playerData.remove("nullarchive_ambient_cooldown");
                     playerData.remove("nullarchive_random_anomaly_cooldown");
-                    for (int phaseIndex = 0; phaseIndex <= 6; phaseIndex++)
+                    for (int phaseIndex = 0; phaseIndex <= 6; phaseIndex++) {
                         playerData.remove("nullarchive_presence_" + phaseIndex);
+                        playerData.remove("nullarchive_inscription_" + phaseIndex);
+                    }
+                    playerData.remove("nullarchive_intake_log");
+                    playerData.remove("nullarchive_intake_log_reveal");
+                    playerData.remove("nullarchive_hidden_record");
+                    playerData.remove("nullarchive_door_unlocked");
+                    playerData.remove("nullarchive_rift_scan");
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Facility generated. Start in Intake and follow the corridor."), false);
                     return 1;
                 }))
@@ -150,8 +157,10 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_ambient_rift");
                     data.remove("nullarchive_ambient_cooldown");
                     data.remove("nullarchive_random_anomaly_cooldown");
-                    for (int phaseIndex = 0; phaseIndex <= 6; phaseIndex++)
+                    for (int phaseIndex = 0; phaseIndex <= 6; phaseIndex++) {
                         data.remove("nullarchive_presence_" + phaseIndex);
+                        data.remove("nullarchive_inscription_" + phaseIndex);
+                    }
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Your investigation progress has been reset. World blocks are unchanged."), false);
                     return 1;
                 })));
