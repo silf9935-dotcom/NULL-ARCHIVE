@@ -564,7 +564,12 @@ public final class ArchiveEvents {
             }
             player.level().playSound(null, observerPos, ModSounds.SIGNAL_DISTORTION.get(),
                     SoundSource.AMBIENT, 0.65F, 0.35F + phase * 0.08F);
-            data.putBoolean("nullarchive_observer_" + phase, true);\n            data.putInt("nullarchive_observer_stage", 1);\n            data.putLong("nullarchive_observer_next", now + 35);\n            data.putInt("nullarchive_observer_x", observerPos.getX());\n            data.putInt("nullarchive_observer_y", observerPos.getY());\n            data.putInt("nullarchive_observer_z", observerPos.getZ());
+            data.putBoolean("nullarchive_observer_" + phase, true);
+            data.putInt("nullarchive_observer_stage", 1);
+            data.putLong("nullarchive_observer_next", now + 35);
+            data.putInt("nullarchive_observer_x", observerPos.getX());
+            data.putInt("nullarchive_observer_y", observerPos.getY());
+            data.putInt("nullarchive_observer_z", observerPos.getZ());
             data.putLong("nullarchive_observer_cooldown", now + 900);
             data.putInt("nullarchive_observer_count", data.getInt("nullarchive_observer_count") + 1);
             player.displayClientMessage(Component.literal(observerMessage), false);
