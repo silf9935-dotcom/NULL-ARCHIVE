@@ -175,6 +175,10 @@ public final class ArchiveEvents {
             player.displayClientMessage(Component.literal("ACCESS // Sealed Door: "
                     + (data.getBoolean("nullarchive_door_unlocked") ? "UNLOCKED" : "LOCKED")
                     + " // Rift scan: " + (data.getBoolean("nullarchive_rift_scan") ? "RECORDED" : "NOT RECORDED")), false);
+            player.displayClientMessage(Component.literal("ROOM 0 // "
+                    + (data.getBoolean("nullarchive_room_zero_clue") ? "RECORD 000 COPIED"
+                    : data.getBoolean("nullarchive_room_zero") ? "OPEN // Unlisted chamber beyond the Rift"
+                    : "NOT INDEXED")), false);
             String nextStep;
             if (data.getBoolean("nullarchive_ending_complete")) nextStep = "COMPLETE // The Rift is sealed. The archive has no further instructions.";
             else if (phase == 0) nextStep = "NEXT // Use the Field Recorder to begin the Intake recording.";
@@ -185,6 +189,9 @@ public final class ArchiveEvents {
             else if (phase == 5) nextStep = "NEXT // Scan the Rift Frame and finish the final recording. Five unique clues are needed to seal the breach.";
             else if (evidenceCount(data) < 5) nextStep = "NEXT // Find more unique clues. Inspect Observation Glass, Memory Block, Sealed Door, and the hidden Records tile.";
             else nextStep = "NEXT // All conditions met. Take the Rift Key to the Rift Frame.";
+            if (!data.getBoolean("nullarchive_ending_complete") && data.getBoolean("nullarchive_room_zero")
+                    && !data.getBoolean("nullarchive_room_zero_clue"))
+                nextStep = "NEXT // Room 0 is open beyond the Rift Chamber. Follow the EMF signal to its central Null Block.";
             player.displayClientMessage(Component.literal(nextStep), false);
             player.displayClientMessage(Component.literal("JOURNAL // This checklist tracks discoveries, not duplicate inventory."), false);
             return 1;
