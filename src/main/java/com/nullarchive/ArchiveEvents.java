@@ -173,9 +173,9 @@ public final class ArchiveEvents {
             String nextStep;
             if (data.getBoolean("nullarchive_ending_complete")) nextStep = "COMPLETE // The Rift is sealed. The archive has no further instructions.";
             else if (phase == 0) nextStep = "NEXT // Use the Field Recorder to begin the Intake recording.";
-            else if (phase == 1) nextStep = "NEXT // Inspect the Intake log and Archive Tile. Catalogue two distinct items, then play tape 2.";
-            else if (phase == 2) nextStep = "NEXT // Inspect Observation Glass and query the Memory Block with a Terminal Cartridge. Find two clues to unlock tape 3.";
-            else if (phase == 3) nextStep = "NEXT // Search anomaly blocks and room inscriptions. Gather three clues and locate the Archive Key before tape 4.";
+            else if (phase == 1) nextStep = "NEXT // Inspect the Intake log and Archive Tile. Catalogue evidence before the later playback gates.";
+            else if (phase == 2) nextStep = "NEXT // Inspect Observation Glass and query the Memory Block with a Terminal Cartridge. Build a two-clue index before tape 4.";
+            else if (phase == 3) nextStep = "NEXT // Search anomaly blocks and room inscriptions. At least two clues are required for tape 4; locate the Archive Key before tape 5.";
             else if (phase == 4) nextStep = "NEXT // Open the Sealed Door with the Archive Key. Search the Records floor for its hidden index.";
             else if (phase == 5) nextStep = "NEXT // Scan the Rift Frame and finish the final recording. Five unique clues are needed to seal the breach.";
             else if (evidenceCount(data) < 5) nextStep = "NEXT // Find more unique clues. Inspect Observation Glass, Memory Block, Sealed Door, and the hidden Records tile.";
@@ -213,8 +213,6 @@ public final class ArchiveEvents {
                     playerData.putBoolean("nullarchive_facility_generated", true);
                     playerData.remove("nullarchive_room_zero");
                     playerData.remove("nullarchive_room_zero_clue");
-                    playerData.putBoolean("nullarchive_facility_generated", true);
-                    playerData.remove("nullarchive_room_zero");
                     playerData.remove("nullarchive_ambient_obs");
                     playerData.remove("nullarchive_ambient_corrupt");
                     playerData.remove("nullarchive_ambient_static");
@@ -283,7 +281,8 @@ public final class ArchiveEvents {
                             level.setBlock(origin.offset(74, 2, 5), concrete, 3);
                             level.setBlock(origin.offset(74, 3, 5), concrete, 3);
                             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-                                boolean baselineCorruption = dx == 0 && Math.abs(dz) <= 1;
+                                // The original Rift floor is a cross; only its four corners are tile.
+                                boolean baselineCorruption = dx == 0 || dz == 0;
                                 level.setBlock(origin.offset(70 + dx, 0, 4 + dz),
                                         baselineCorruption ? corrupted : tile, 3);
                             }
@@ -292,11 +291,6 @@ public final class ArchiveEvents {
                             level.setBlock(origin.offset(70, 2, 4), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
                             level.setBlock(origin.offset(72, 1, 4), nullBlock, 3);
                             level.setBlock(origin.offset(70, 0, 4), corrupted, 3);
-                            // The final tape also turns two adjacent floor tiles into corruption.
-                            level.setBlock(origin.offset(69, 0, 4), tile, 3);
-                            level.setBlock(origin.offset(71, 0, 4), tile, 3);
-                            level.setBlock(origin.offset(70, 0, 3), tile, 3);
-                            level.setBlock(origin.offset(70, 0, 5), tile, 3);
                         }
                     }
                     data.remove(PHASE_KEY);
@@ -313,11 +307,6 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_memory_echo");
                     data.remove("nullarchive_intake_log");
                     data.remove("nullarchive_intake_log_reveal");
-                    data.remove("nullarchive_facility_x");
-                    data.remove("nullarchive_facility_y");
-                    data.remove("nullarchive_facility_z");
-                    data.remove("nullarchive_facility_dimension");
-                    data.remove("nullarchive_facility_generated");
                     data.remove("nullarchive_room_zero");
                     data.remove("nullarchive_room_zero_clue");
                     data.remove("nullarchive_ambient_obs");
@@ -347,7 +336,7 @@ public final class ArchiveEvents {
                         data.remove("nullarchive_presence_" + phaseIndex);
                         data.remove("nullarchive_inscription_" + phaseIndex);
                     }
-                    player.displayClientMessage(Component.literal("NULL ARCHIVE // Your investigation progress has been reset. World blocks are unchanged."), false);
+                    player.displayClientMessage(Component.literal("NULL ARCHIVE // Investigation reset. Facility tracking retained. The door, ending seal, and Room 0 were restored where applicable; other world changes remain."), false);
                     return 1;
                 })));
     }
@@ -835,12 +824,18 @@ public final class ArchiveEvents {
         if (event.getLevel().isClientSide() || event.getEntity().level().isClientSide()) return;
         Player player = event.getEntity();
         CompoundTag data = player.getPersistentData();
-        if (!data.getBoolean("nullarchive_room_zero") || data.getBoolean("nullarchive_room_zero_clue")) return;
-        if (!data.contains("nullarchive_facility_x")
+        if (!data.getBoolean("nullarchive_room_zero")
+                || !data.contains("nullarchive_facility_x")
                 || !data.getString("nullarchive_facility_dimension").equals(player.level().dimension().location().toString())) return;
         BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
                 data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
         if (!event.getPos().equals(origin.offset(81, 1, 4))) return;
+        // Keep the centerpiece interaction exclusive; it is not a generic anomaly block.
+        event.setCanceled(true);
+        if (data.getBoolean("nullarchive_room_zero_clue")) {
+            player.displayClientMessage(Component.literal("ROOM 0 // The record has already been copied. The block is listening."), false);
+            return;
+        }
         if (data.getInt(INSTABILITY_KEY) < 35 || data.getInt(PHASE_KEY) < 4) {
             player.displayClientMessage(Component.literal("ROOM 0 // The block is inert. The room is not ready to be remembered."), false);
             return;
