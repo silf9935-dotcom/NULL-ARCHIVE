@@ -202,6 +202,7 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_door_unlocked");
                     data.remove("nullarchive_rift_scan");
                     data.remove("nullarchive_hidden_record");
+                    data.remove("nullarchive_memory_echo");
                     data.remove("nullarchive_intake_log");
                     data.remove("nullarchive_intake_log_reveal");
                     data.remove("nullarchive_facility_x");
@@ -659,14 +660,22 @@ public final class ArchiveEvents {
                 }
             } else {
                 evidence = evidenceCount(data);
-                String output = phase < 2
-                        ? "MEMORY TERMINAL // ACCESS DENIED. Complete the intake recordings."
-                        : evidence < 2
-                        ? "MEMORY TERMINAL // Empty index. Catalogue at least two clues before querying."
-                        : data.getInt(EVIDENCE_FLAGS_KEY) != 0 && (data.getInt(EVIDENCE_FLAGS_KEY) & TERMINAL_FLAG) != 0
-                        ? "MEMORY TERMINAL // /SUBJECT/NULL/EXIT_LOG.txt // The file timestamp is tomorrow. Use a cartridge to query the archive."
-                        : "MEMORY TERMINAL // Indexed fragments: " + evidence + " // Cartridge interface required. Query locked.";
-                event.getEntity().displayClientMessage(Component.literal(output), false);
+                if (phase >= 3 && !data.getBoolean("nullarchive_memory_echo")) {
+                    data.putBoolean("nullarchive_memory_echo", true);
+                    event.getEntity().displayClientMessage(Component.literal(
+                            "MEMORY ECHO // A voice speaks from the block: \"You are not retrieving a file. You are returning one.\""), false);
+                    event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(),
+                            SoundSource.BLOCKS, 0.7F, 0.35F);
+                } else {
+                    String output = phase < 2
+                            ? "MEMORY TERMINAL // ACCESS DENIED. Complete the intake recordings."
+                            : evidence < 2
+                            ? "MEMORY TERMINAL // Empty index. Catalogue at least two clues before querying."
+                            : data.getInt(EVIDENCE_FLAGS_KEY) != 0 && (data.getInt(EVIDENCE_FLAGS_KEY) & TERMINAL_FLAG) != 0
+                            ? "MEMORY TERMINAL // /SUBJECT/NULL/EXIT_LOG.txt // The file timestamp is tomorrow. Use a cartridge to query the archive."
+                            : "MEMORY TERMINAL // Indexed fragments: " + evidence + " // Cartridge interface required. Query locked.";
+                    event.getEntity().displayClientMessage(Component.literal(output), false);
+                }
             }
         } else if (block.equals(ModBlocks.BLACK_GLASS.get())
                 && data.getBoolean("nullarchive_ending_complete")
