@@ -198,6 +198,7 @@ public final class ArchiveEvents {
                     data.remove(EVIDENCE_FLAGS_KEY);
                     data.remove(ANOMALY_KEY);
                     data.remove("nullarchive_anomaly_cooldown");
+                    data.remove("nullarchive_emf_cooldown");
                     data.remove("nullarchive_ending_complete");
                     data.remove("nullarchive_door_unlocked");
                     data.remove("nullarchive_rift_scan");
@@ -525,6 +526,12 @@ public final class ArchiveEvents {
                     SoundSource.PLAYERS, 0.45F, 1.1F);
             return;
         }
+        long now = event.getLevel().getGameTime();
+        if (now < data.getLong("nullarchive_emf_cooldown")) {
+            player.displayClientMessage(Component.literal("EMF // The receiver is still recalibrating. Wait for the needle to settle."), false);
+            return;
+        }
+        data.putLong("nullarchive_emf_cooldown", now + 20);
         BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
                 data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
         BlockPos[] targets = {
