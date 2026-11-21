@@ -765,16 +765,21 @@ public final class ArchiveEvents {
                             "RIFT LOCK // Final tape and at least five of eight clues required. Progress: " + phase + "/6 // Evidence: " + evidence + "/8"), false);
                 } else {
                     data.putBoolean("nullarchive_ending_complete", true);
+                    boolean unstableEnding = data.getInt(INSTABILITY_KEY) >= 80;
                     if (!event.getEntity().getAbilities().instabuild) held.shrink(1);
-                    // Make the ending visible in the world: the frame seals into glass,
-                    // with a final null fragment left above the threshold.
-                    event.getLevel().setBlock(event.getPos(), ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
-                    event.getLevel().setBlock(event.getPos().above(), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
+                    // The instability threshold changes the physical seal and the ending text.
+                    event.getLevel().setBlock(event.getPos(), (unstableEnding
+                            ? ModBlocks.NULL_BLOCK.get().defaultBlockState()
+                            : ModBlocks.BLACK_GLASS.get().defaultBlockState()), 3);
+                    event.getLevel().setBlock(event.getPos().above(), (unstableEnding
+                            ? ModBlocks.BLACK_GLASS.get().defaultBlockState()
+                            : ModBlocks.NULL_BLOCK.get().defaultBlockState()), 3);
                     event.getLevel().setBlock(event.getPos().below(), ModBlocks.CORRUPTED_STONE.get().defaultBlockState(), 3);
-                    event.getEntity().displayClientMessage(Component.literal(
-                            "ENDING // The key turns without touching the lock. The rift folds inward. On the other side, someone finishes your sentence. ARCHIVE CLOSED."), false);
+                    event.getEntity().displayClientMessage(Component.literal(unstableEnding
+                            ? "ENDING // ARCHIVE ERROR: SUBJECT OUTSIDE RECORD. The key turns in a lock that has no shape. Something is sealed, but it is not you."
+                            : "ENDING // The key turns without touching the lock. The rift folds inward. On the other side, someone finishes your sentence. ARCHIVE CLOSED."), false);
                     event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(),
-                            SoundSource.BLOCKS, 1.2F, 0.35F);
+                            SoundSource.BLOCKS, 1.2F, unstableEnding ? 0.2F : 0.35F);
                     event.setCanceled(true);
                 }
             } else {
