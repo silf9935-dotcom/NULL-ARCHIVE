@@ -212,7 +212,9 @@ public final class ArchiveEvents {
                     playerData.putString("nullarchive_facility_dimension", level.dimension().location().toString());
                     playerData.putBoolean("nullarchive_facility_generated", true);
                     playerData.remove("nullarchive_room_zero");
-                    playerData.remove("nullarchive_room_zero_clue");\n                    playerData.putBoolean("nullarchive_facility_generated", true);\n                    playerData.remove("nullarchive_room_zero");
+                    playerData.remove("nullarchive_room_zero_clue");
+                    playerData.putBoolean("nullarchive_facility_generated", true);
+                    playerData.remove("nullarchive_room_zero");
                     playerData.remove("nullarchive_ambient_obs");
                     playerData.remove("nullarchive_ambient_corrupt");
                     playerData.remove("nullarchive_ambient_static");
@@ -306,7 +308,10 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_facility_x");
                     data.remove("nullarchive_facility_y");
                     data.remove("nullarchive_facility_z");
-                    data.remove("nullarchive_facility_dimension");\n                    data.remove("nullarchive_facility_generated");\n                    data.remove("nullarchive_room_zero");
+                    data.remove("nullarchive_facility_dimension");
+                    data.remove("nullarchive_facility_generated");
+                    data.remove("nullarchive_room_zero");
+                    data.remove("nullarchive_room_zero_clue");
                     data.remove("nullarchive_ambient_obs");
                     data.remove("nullarchive_ambient_corrupt");
                     data.remove("nullarchive_ambient_static");
