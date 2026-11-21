@@ -88,6 +88,14 @@ public final class ArchiveEvents {
             player.displayClientMessage(Component.literal("ENDING // " + (phase >= 6 && evidenceCount(data) >= 5
                     ? "Requirements met. Locate the Rift Frame and use the Rift Key."
                     : "Requires all 6 recordings and 5 distinct clues.")), false);
+            String nextStep;
+            if (phase == 0) nextStep = "NEXT // Use the Field Recorder to begin the Intake recording.";
+            else if (phase < 6 && evidenceCount(data) < 2) nextStep = "NEXT // Catalogue distinct evidence items, then replay the recorder.";
+            else if (phase < 6) nextStep = "NEXT // Continue the Field Recorder. Later tapes unlock as the archive accepts clues.";
+            else if (evidenceCount(data) < 5) nextStep = "NEXT // Find more unique clues. Inspect Observation Glass, Memory Block, Sealed Door, and the hidden Records tile.";
+            else nextStep = "NEXT // All conditions met. Take the Rift Key to the Rift Frame.";
+            player.displayClientMessage(Component.literal(nextStep), false);
+            player.displayClientMessage(Component.literal("JOURNAL // This checklist tracks discoveries, not duplicate inventory."), false);
             return 1;
         }));
         event.getDispatcher().register(Commands.literal("nullarchive")
