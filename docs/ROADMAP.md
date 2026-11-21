@@ -42,7 +42,7 @@
 - [ ] Original textures, models, blockstates, and sound assets
 - [ ] In-game tutorial and journal
 - [ ] Balance a full ~2-hour playthrough
-- [ ] Endings and replayability
+- [x] Instability-dependent alternate ending\n- [ ] Endings and replayability
 
 ## Engineering rules
 - Keep the project on Forge, not NeoForge.
