@@ -88,6 +88,8 @@ public final class ArchiveEvents {
         // Open the original Rift Chamber east wall so the new room is reachable.
         level.setBlock(origin.offset(74, 1, 4), air, 3);
         level.setBlock(origin.offset(74, 2, 4), air, 3);
+        level.setBlock(origin.offset(75, 1, 4), air, 3);
+        level.setBlock(origin.offset(75, 2, 4), air, 3);
         level.setBlock(origin.offset(76, 1, 4), air, 3);
         level.setBlock(origin.offset(76, 2, 4), air, 3);
     }
@@ -263,6 +265,8 @@ public final class ArchiveEvents {
                         var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
                         level.setBlock(origin.offset(74, 1, 4), concrete, 3);
                         level.setBlock(origin.offset(74, 2, 4), concrete, 3);
+                        level.setBlock(origin.offset(75, 1, 4), concrete, 3);
+                        level.setBlock(origin.offset(75, 2, 4), concrete, 3);
                         level.setBlock(origin.offset(76, 1, 4), concrete, 3);
                         level.setBlock(origin.offset(76, 2, 4), concrete, 3);
                     }
