@@ -561,6 +561,7 @@ public final class ArchiveEvents {
             return;
         }
         stack.shrink(1);
+        increaseInstability(event.getEntity(), 8, "Unique evidence indexed.");
         event.getEntity().displayClientMessage(Component.literal("EVIDENCE INDEX // Unique fragment catalogued: " + evidenceCount(data) + "/8"), false);
         event.getLevel().playSound(null, event.getEntity().blockPosition(),
                 ModSounds.ARCHIVE_PULSE.get(), SoundSource.PLAYERS, 0.65F, 1.0F);
