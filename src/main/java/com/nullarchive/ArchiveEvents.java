@@ -510,6 +510,36 @@ public final class ArchiveEvents {
         }
         // Once noticed, the Observer performs a three-beat stalking sequence over several seconds.
         int observerStage = data.getInt("nullarchive_observer_stage");
+        if (observerStage > 0) {
+            BlockPos echoPos = new BlockPos(data.getInt("nullarchive_observer_x"),
+                    data.getInt("nullarchive_observer_y"), data.getInt("nullarchive_observer_z"));
+            double distanceSq = pos.distSqr(echoPos);
+            // The Observer abandons its sequence if approached or directly watched.
+            if (distanceSq <= 9.0 || (distanceSq <= 144.0
+                    && player.getViewVector(1.0F).normalize().dot(
+                    new net.minecraft.world.phys.Vec3(echoPos.getX() + 0.5 - player.getX(),
+                            echoPos.getY() + 1.0 - player.getEyeY(),
+                            echoPos.getZ() + 0.5 - player.getZ()).normalize()) > 0.86)) {
+                if (player.level() instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(ParticleTypes.SMOKE, echoPos.getX() + 0.5,
+                            echoPos.getY() + 1.0, echoPos.getZ() + 0.5, 14, 0.3, 0.7, 0.3, 0.02);
+                    serverLevel.sendParticles(ParticleTypes.PORTAL, echoPos.getX() + 0.5,
+                            echoPos.getY() + 1.0, echoPos.getZ() + 0.5, 18, 0.4, 0.8, 0.4, 0.2);
+                }
+                player.level().playSound(null, echoPos, ModSounds.SIGNAL_DISTORTION.get(),
+                        SoundSource.AMBIENT, 0.65F, 0.25F);
+                player.displayClientMessage(Component.literal(distanceSq <= 9.0
+                        ? "OBSERVER // It vanishes the moment you reach it."
+                        : "OBSERVER // It disappears when you look directly at it."), false);
+                data.remove("nullarchive_observer_stage");
+                data.remove("nullarchive_observer_next");
+                data.remove("nullarchive_observer_x");
+                data.remove("nullarchive_observer_y");
+                data.remove("nullarchive_observer_z");
+                data.putLong("nullarchive_observer_cooldown", now + 900);
+                return;
+            }
+        }
         if (observerStage > 0 && now >= data.getLong("nullarchive_observer_next")) {
             BlockPos echoPos = new BlockPos(data.getInt("nullarchive_observer_x"),
                     data.getInt("nullarchive_observer_y"), data.getInt("nullarchive_observer_z"));
