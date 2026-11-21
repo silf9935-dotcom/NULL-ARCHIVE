@@ -1,10 +1,10 @@
 # NULL ARCHIVE — Phase Progression
 
-## First playable loop
+## Recording sequence
 
-The Field Recorder is the first narrative progression item. Right-clicking it on the server advances the player's personal archive phase and displays the next tape transcript. Progress is stored in the player's persistent NBT under `nullarchive_phase`, so it survives relogging and world saves.
+The Field Recorder advances the player's personal investigation through six server-authoritative phases. Progress is stored in player persistent data under `nullarchive_phase` and survives relogging and world saves.
 
-| Phase | Tape | Narrative beat |
+| Phase | Recording | Narrative beat |
 |---|---|---|
 | 1 | Intake | The facility is powered, but its visitor log is unsigned. |
 | 2 | Basement | A second set of footsteps mirrors the player. |
@@ -13,23 +13,38 @@ The Field Recorder is the first narrative progression item. Right-clicking it on
 | 5 | Breach | The sealed archive door appears open without breaking its seal. |
 | 6 | Null | A recording from tomorrow warns the player not to leave. |
 
-After phase 6, the recorder reports SIGNAL LOST and does not advance further.
+Later recordings are gated by the investigation's evidence count. The recorder does not advance beyond phase 6; the Rift Key is used at the Rift Frame to complete the standard ending.
 
-## Evidence loop
+## Evidence catalogue
 
-Evidence is now a distinct catalogue rather than a repeatable counter:
-- Evidence Tape, Damaged Photograph, Memory Fragment, and Sealed Document each count once per player.
-- Observation Glass becomes a clue after phase 2.
-- Memory Block records a terminal clue after phase 2.
-- Sealed Door records its seal clue after phase 4.
-- Duplicate item types and repeat visits do not increase the catalogue.
-- The Rift Key ending requires phase 6 and at least five distinct catalogue entries (seven possible).
+Eight distinct discoveries can be indexed once per player:
 
-Legacy player data with the old evidence counter is migrated on the first new catalogue interaction.
+1. Evidence Tape
+2. Damaged Photograph
+3. Memory Fragment
+4. Sealed Document
+5. Observation Glass
+6. Memory Block terminal query
+7. Sealed Door
+8. Hidden Records floor tile
 
-## Design constraints
+Duplicates and repeat visits do not increase the catalogue. The standard ending requires all six recordings and at least five distinct clues. The Room 0 record described below is deliberately separate from these eight clues and does not increase the ending counter.
 
-- Phase state is per-player, not global, so co-op investigations do not overwrite one another.
-- The server owns phase changes; client-side right-clicks never mutate progression.
-- The current implementation is intentionally a vertical-slice prototype. Future milestones will replace direct tape messages with evidence checks, terminal flags, anomaly triggers, and cinematic sequences.
-- Phase state currently has no in-game reset item or admin command. Use a test profile/world when validating the progression loop.
+Legacy player data with the earlier evidence counter is migrated when the catalogue is next updated.
+
+## Instability and Room 0
+
+Investigation actions increase Archive Instability. At 100%, one of four breach events occurs, pressure returns to 35%, and a 60-second breach cooldown begins. The first breach after phase 4 opens an unlisted chamber beyond the Rift Chamber and creates a passage through its east wall.
+
+The centerpiece Null Block in Room 0 contains Record 000. It can be copied once per player when the investigation has reached phase 4 and instability is at least 35%. This is an optional hidden narrative discovery, not a ninth standard evidence clue.
+
+The EMF Reader scans nearby authored signals and mutated anomaly blocks within roughly eight blocks. It can detect a nearby anomaly even when no normal room landmark is in range; after Room 0 opens, its centerpiece receives a dedicated Room 0 reading. The field journal reports whether Room 0 is unopened, open, or already copied.
+
+## Replay and authority
+
+- `/archivejournal` shows recording progress, all eight standard clue slots, ending requirements, access states, Room 0 state, and the current next-step hint.
+- `/nullarchive status` reports the player's progression, instability, breach count, access state, and ending state (permission level 2).
+- `/nullarchive reset` resets player progression and investigation triggers. It retains the generated facility coordinates and restores the Sealed Door, Room 0 passage, and known final-tape Rift mutations where applicable; unrelated ambient world mutations remain.
+- `/nullarchive generate` builds a new seven-room facility around the command executor and moves them into Intake. It replaces blocks in its footprint and creates new item drops, so rerunning it duplicates drops.
+
+The server owns progression changes. Client-side interactions do not write player progress. The current implementation remains a mechanics prototype: the journal is chat-based, the facility is command-generated, and the textures/audio are not yet a finished art pass.
