@@ -147,6 +147,15 @@ public final class ArchiveEvents {
                 .then(Commands.literal("reset").executes(context -> {
                     Player player = context.getSource().getPlayerOrException();
                     CompoundTag data = player.getPersistentData();
+                    // Reset the physical gate too, so cleared player progress cannot bypass it.
+                    if (data.contains("nullarchive_facility_x")
+                            && data.getString("nullarchive_facility_dimension").equals(context.getSource().getLevel().dimension().location().toString())) {
+                        BlockPos doorBase = new BlockPos(data.getInt("nullarchive_facility_x") + 65,
+                                data.getInt("nullarchive_facility_y") + 1, data.getInt("nullarchive_facility_z") + 4);
+                        var closedDoor = ModBlocks.SEALED_DOOR.get().defaultBlockState();
+                        context.getSource().getLevel().setBlock(doorBase, closedDoor, 3);
+                        context.getSource().getLevel().setBlock(doorBase.above(), closedDoor, 3);
+                    }
                     data.remove(PHASE_KEY);
                     data.remove(EVIDENCE_KEY);
                     data.remove(EVIDENCE_FLAGS_KEY);
