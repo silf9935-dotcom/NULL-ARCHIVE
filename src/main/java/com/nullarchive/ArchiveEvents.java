@@ -245,6 +245,9 @@ public final class ArchiveEvents {
                     CompoundTag data = player.getPersistentData();
                     // Restore the physical gate and ending-specific Rift mutations for a replay.
                     boolean endingWasComplete = data.getBoolean("nullarchive_ending_complete");
+                    // Tape 06 rewrites the chamber before the player necessarily meets the ending requirements.
+                    boolean finalTapeWasPlayed = data.getInt(PHASE_KEY) >= 6;
+                    boolean riftChamberWasShifted = endingWasComplete || finalTapeWasPlayed;
                     boolean roomZeroWasOpen = data.getBoolean("nullarchive_room_zero");
                     if (roomZeroWasOpen && data.contains("nullarchive_facility_x")
                             && data.getString("nullarchive_facility_dimension").equals(context.getSource().getLevel().dimension().location().toString())) {
@@ -267,7 +270,7 @@ public final class ArchiveEvents {
                         var closedDoor = ModBlocks.SEALED_DOOR.get().defaultBlockState();
                         level.setBlock(doorBase, closedDoor, 3);
                         level.setBlock(doorBase.above(), closedDoor, 3);
-                        if (endingWasComplete) {
+                        if (riftChamberWasShifted) {
                             // Revert only the known final-tape and ending seal positions.
                             var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
                             var tile = ModBlocks.ARCHIVE_TILE.get().defaultBlockState();
