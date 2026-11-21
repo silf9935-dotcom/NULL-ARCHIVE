@@ -169,6 +169,9 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_ambient_rift");
                     data.remove("nullarchive_ambient_cooldown");
                     data.remove("nullarchive_random_anomaly_cooldown");
+                    data.remove("nullarchive_last_stalking_cue");
+                    data.remove("nullarchive_stalking_cue_cooldown");
+                    data.remove("nullarchive_ending_seal_feedback");
                     for (int phaseIndex = 0; phaseIndex <= 6; phaseIndex++) {
                         data.remove("nullarchive_presence_" + phaseIndex);
                         data.remove("nullarchive_inscription_" + phaseIndex);
