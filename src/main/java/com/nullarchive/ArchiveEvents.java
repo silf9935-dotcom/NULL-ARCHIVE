@@ -174,9 +174,11 @@ public final class ArchiveEvents {
                             level.setBlock(origin.offset(74, 1, 5), concrete, 3);
                             level.setBlock(origin.offset(74, 2, 5), concrete, 3);
                             level.setBlock(origin.offset(74, 3, 5), concrete, 3);
-                            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+                            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+                                boolean baselineCorruption = dx == 0 && Math.abs(dz) <= 1;
                                 level.setBlock(origin.offset(70 + dx, 0, 4 + dz),
-                                        dx == 0 && dz == 0 ? corrupted : tile, 3);
+                                        baselineCorruption ? corrupted : tile, 3);
+                            }
                             level.setBlock(origin.offset(73, 1, 4), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
                             level.setBlock(origin.offset(70, 1, 4), ModBlocks.RIFT_FRAME.get().defaultBlockState(), 3);
                             level.setBlock(origin.offset(70, 2, 4), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
