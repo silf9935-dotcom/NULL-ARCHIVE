@@ -224,6 +224,11 @@ public final class ArchiveEvents {
                     playerData.remove("nullarchive_random_anomaly_cooldown");
                     playerData.remove("nullarchive_observer_cooldown");
                     playerData.remove("nullarchive_observer_count");
+                    playerData.remove("nullarchive_observer_stage");
+                    playerData.remove("nullarchive_observer_next");
+                    playerData.remove("nullarchive_observer_x");
+                    playerData.remove("nullarchive_observer_y");
+                    playerData.remove("nullarchive_observer_z");
                     for (int observerPhase = 3; observerPhase <= 6; observerPhase++) playerData.remove("nullarchive_observer_" + observerPhase);
                     for (int phaseIndex = 0; phaseIndex <= 6; phaseIndex++) {
                         playerData.remove("nullarchive_presence_" + phaseIndex);
