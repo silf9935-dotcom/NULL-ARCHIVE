@@ -32,7 +32,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 - Progress and evidence are stored in player persistent data; there is no reset/journal UI yet.
 - Evidence is now tracked by distinct item/clue flags: four evidence item types plus Observation Glass, Memory Block, Sealed Door, and the hidden Records room clues. The Rift ending still requires five distinct clues; duplicates cannot be farmed.
 - Sealed Door now has a persistent open/closed state and changes collision so the player can pass; the open state uses an iron-bars visual placeholder.
-- The EMF Reader is a proximity scanner prototype: it detects phase-gated landmarks within an 8-block radius and reports signal strength plus a rough direction along the facility corridor. It is not precise navigation and does not add evidence.
+- The EMF Reader is a proximity scanner prototype: it detects phase-gated landmarks within an 8-block radius and reports signal strength plus a rough direction along the facility corridor. It has a 1-second recalibration cooldown to limit scan spam. It is not precise navigation and does not add evidence.
 - Most other interactions remain text-and-sound prototypes. The Rift Key ending now physically seals the clicked frame with Black Glass, leaves a Null Block above, and changes the floor below to Corrupted Stone. Interacting with that seal after the ending returns a short confirmation response. This is a static seal, not an animation.
 - Playing tape 6 triggers the final room-shift mutation once per playback (repeated playback is phase-locked). The sound registry currently uses vanilla sound assets.
 - CI build must pass for the latest commit before calling this prototype verified.
