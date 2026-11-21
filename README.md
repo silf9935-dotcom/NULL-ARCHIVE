@@ -46,7 +46,7 @@ Admin commands:
 - Six recordings with phase and evidence progression gates.
 - Eight distinct clue flags with legacy evidence-counter migration.
 - Command-built seven-room facility with curated item drops and room landmarks.
-- Persistent environmental changes and one-time proximity anomalies, including stalking cues and false passages.
+- Persistent environmental changes and one-time proximity anomalies, including stalking cues and false passages.\n- Archive Instability (0–100): tape playback, unique evidence, EMF scans, access grants, and Rift scans raise pressure; thresholds warn the player. At 100, a breach triggers portal/smoke particles and one of four narrative events, then drops pressure to 35 with a 60-second cooldown.
 - Intake log with a delayed reveal, phase-specific archive inscriptions, and a hidden Records clue.
 - Memory terminal requires a cartridge and two indexed clues; its query can register a clue.
 - Sealed Door requires phase 4, three clues, and an Archive Key on first access.
