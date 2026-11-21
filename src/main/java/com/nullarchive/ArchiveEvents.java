@@ -89,8 +89,8 @@ public final class ArchiveEvents {
                 "MEMORY COLLAPSE // Every inscription nearby seems to have changed. Your journal still remembers the old text."
         };
         int previous = data.getInt(LAST_BREACH_KEY);
-        int eventIndex = player.getRandom().nextInt(events.length - 1);
-        if (eventIndex >= previous) eventIndex++;
+        int eventIndex = player.getRandom().nextInt(events.length);
+        if (data.getInt(BREACH_COUNT_KEY) > 0 && eventIndex == previous) eventIndex = (eventIndex + 1) % events.length;
         data.putInt(LAST_BREACH_KEY, eventIndex);
         data.putInt(BREACH_COUNT_KEY, data.getInt(BREACH_COUNT_KEY) + 1);
         data.putInt(INSTABILITY_KEY, 35);
