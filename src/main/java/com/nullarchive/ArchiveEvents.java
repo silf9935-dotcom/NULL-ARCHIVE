@@ -112,6 +112,8 @@ public final class ArchiveEvents {
                     CompoundTag data = player.getPersistentData();
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Phase " + data.getInt(PHASE_KEY)
                             + "/6 // Evidence " + evidenceCount(data) + "/8 // Anomaly " + data.getInt(ANOMALY_KEY)
+                            + " // Gate " + (data.getBoolean("nullarchive_door_unlocked") ? "UNLOCKED" : "LOCKED")
+                            + " // Rift Scan " + (data.getBoolean("nullarchive_rift_scan") ? "RECORDED" : "NOT RECORDED")
                             + " // Ending " + (data.getBoolean("nullarchive_ending_complete") ? "COMPLETE" : "INCOMPLETE")), false);
                     return 1;
                 }))
