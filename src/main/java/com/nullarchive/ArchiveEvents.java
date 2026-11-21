@@ -850,17 +850,24 @@ public final class ArchiveEvents {
         if (event.getLevel().isClientSide()) return;
         var stack = event.getItemStack();
         String response;
+        CompoundTag data = event.getEntity().getPersistentData();
         if (stack.is(ModItems.ARCHIVE_KEY.get())) {
-            response = event.getEntity().getPersistentData().getInt(PHASE_KEY) < 3
+            response = data.getBoolean("nullarchive_door_unlocked")
+                    ? "ARCHIVE KEY // The teeth are warm. The lock has already accepted you."
+                    : data.getInt(PHASE_KEY) < 3
                     ? "ARCHIVE KEY // The teeth are worn smooth. It fits a lock you have not found."
                     : "ARCHIVE KEY // A lock clicks somewhere below the archive.";
         } else if (stack.is(ModItems.RIFT_KEY.get())) {
-            response = event.getEntity().getPersistentData().getInt(PHASE_KEY) < 5
+            response = data.getBoolean("nullarchive_ending_complete")
+                    ? "RIFT KEY // The metal is inert. The seal is permanent."
+                    : data.getInt(PHASE_KEY) < 5
                     ? "RIFT KEY // It is vibrating. The breach is not ready."
                     : "RIFT KEY // The metal bends toward the rift. Do not turn it.";
         } else if (stack.is(ModItems.TERMINAL_CARTRIDGE.get())) {
-            response = evidenceCount(event.getEntity().getPersistentData()) < 2
+            response = evidenceCount(data) < 2
                     ? "CARTRIDGE // DATA CORRUPTED. More evidence required."
+                    : (data.getInt(EVIDENCE_FLAGS_KEY) & TERMINAL_FLAG) != 0
+                    ? "CARTRIDGE // Query recorded. The file timestamp is tomorrow."
                     : "CARTRIDGE // Recovered directory: /SUBJECT/NULL/EXIT_LOG.txt";
         } else return;
         event.getEntity().displayClientMessage(Component.literal(response), false);
