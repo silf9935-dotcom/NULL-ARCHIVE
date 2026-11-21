@@ -4,7 +4,7 @@ This is an early mechanics prototype. It includes a command-built seven-room arc
 
 ## Quick test (creative mode)
 
-1. Enter a world and open the NULL ARCHIVE creative tab. Use `/archivejournal` at any time to view tape progress, the eight distinct clue slots, ending requirements, and a phase-specific next-step hint.
+1. Enter a world and open the NULL ARCHIVE creative tab. Use `/archivejournal` at any time to view tape progress, the eight distinct clue slots, ending requirements, and a phase-specific next-step hint (or a completion message after the ending).
 2. Take the Field Recorder. Right-click to play tapes in order.
 3. At the Intake counter, right-click the concrete block at the counter's center (relative position +4, +1, +2 from the generated facility origin) after tape 1 to reveal a one-time visitor log. The entry changes after tape 3; if discovered earlier, return after tape 3 for the one-time reveal.
 4. Right-click Evidence Tape, Damaged Photograph, Memory Fragment, and Sealed Document to catalogue each item type once. Duplicates do not increase progress; the first catalogue consumes one item.
