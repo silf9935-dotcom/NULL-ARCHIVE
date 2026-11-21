@@ -150,14 +150,44 @@ public final class ArchiveEvents {
                 .then(Commands.literal("reset").executes(context -> {
                     Player player = context.getSource().getPlayerOrException();
                     CompoundTag data = player.getPersistentData();
-                    // Reset the physical gate too, so cleared player progress cannot bypass it.
+                    // Restore the physical gate and ending-specific Rift mutations for a replay.
+                    boolean endingWasComplete = data.getBoolean("nullarchive_ending_complete");
                     if (data.contains("nullarchive_facility_x")
                             && data.getString("nullarchive_facility_dimension").equals(context.getSource().getLevel().dimension().location().toString())) {
-                        BlockPos doorBase = new BlockPos(data.getInt("nullarchive_facility_x") + 65,
-                                data.getInt("nullarchive_facility_y") + 1, data.getInt("nullarchive_facility_z") + 4);
+                        ServerLevel level = context.getSource().getLevel();
+                        BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
+                                data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
+                        BlockPos doorBase = origin.offset(65, 1, 4);
                         var closedDoor = ModBlocks.SEALED_DOOR.get().defaultBlockState();
-                        context.getSource().getLevel().setBlock(doorBase, closedDoor, 3);
-                        context.getSource().getLevel().setBlock(doorBase.above(), closedDoor, 3);
+                        level.setBlock(doorBase, closedDoor, 3);
+                        level.setBlock(doorBase.above(), closedDoor, 3);
+                        if (endingWasComplete) {
+                            // Revert only the known final-tape and ending seal positions.
+                            var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
+                            var tile = ModBlocks.ARCHIVE_TILE.get().defaultBlockState();
+                            var corrupted = ModBlocks.CORRUPTED_STONE.get().defaultBlockState();
+                            var blackGlass = ModBlocks.BLACK_GLASS.get().defaultBlockState();
+                            var nullBlock = ModBlocks.NULL_BLOCK.get().defaultBlockState();
+                            level.setBlock(origin.offset(74, 1, 4), concrete, 3);
+                            level.setBlock(origin.offset(74, 2, 4), concrete, 3);
+                            level.setBlock(origin.offset(74, 3, 4), concrete, 3);
+                            level.setBlock(origin.offset(74, 1, 5), concrete, 3);
+                            level.setBlock(origin.offset(74, 2, 5), concrete, 3);
+                            level.setBlock(origin.offset(74, 3, 5), concrete, 3);
+                            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+                                level.setBlock(origin.offset(70 + dx, 0, 4 + dz),
+                                        dx == 0 && dz == 0 ? corrupted : tile, 3);
+                            level.setBlock(origin.offset(73, 1, 4), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+                            level.setBlock(origin.offset(70, 1, 4), ModBlocks.RIFT_FRAME.get().defaultBlockState(), 3);
+                            level.setBlock(origin.offset(70, 2, 4), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+                            level.setBlock(origin.offset(72, 1, 4), nullBlock, 3);
+                            level.setBlock(origin.offset(70, 0, 4), corrupted, 3);
+                            // The final tape also turns two adjacent floor tiles into corruption.
+                            level.setBlock(origin.offset(69, 0, 4), tile, 3);
+                            level.setBlock(origin.offset(71, 0, 4), tile, 3);
+                            level.setBlock(origin.offset(70, 0, 3), tile, 3);
+                            level.setBlock(origin.offset(70, 0, 5), tile, 3);
+                        }
                     }
                     data.remove(PHASE_KEY);
                     data.remove(EVIDENCE_KEY);
