@@ -1,5 +1,17 @@
 {
-  "archive_pulse": { "sounds": [ "minecraft:block.amethyst_block.chime" ] },
-  "signal_distortion": { "sounds": [ "minecraft:block.note_block.bit" ] },
-  "tape_click": { "sounds": [ "minecraft:item.spyglass.use" ] }
+  "archive_pulse": {
+    "sounds": [
+      { "name": "minecraft:block.amethyst_block.chime", "type": "event" }
+    ]
+  },
+  "signal_distortion": {
+    "sounds": [
+      { "name": "minecraft:block.note_block.bit", "type": "event" }
+    ]
+  },
+  "tape_click": {
+    "sounds": [
+      { "name": "minecraft:item.spyglass.use", "type": "event" }
+    ]
+  }
 }
