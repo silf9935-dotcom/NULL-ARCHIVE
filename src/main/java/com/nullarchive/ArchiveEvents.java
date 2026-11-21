@@ -85,6 +85,9 @@ public final class ArchiveEvents {
         level.setBlock(origin.offset(81, 0, 4), ModBlocks.CORRUPTED_STONE.get().defaultBlockState(), 3);
         level.setBlock(origin.offset(81, 2, 4), glass, 3);
         level.setBlock(origin.offset(81, 3, 4), air, 3);
+        // Open the original Rift Chamber east wall so the new room is reachable.
+        level.setBlock(origin.offset(74, 1, 4), air, 3);
+        level.setBlock(origin.offset(74, 2, 4), air, 3);
         level.setBlock(origin.offset(76, 1, 4), air, 3);
         level.setBlock(origin.offset(76, 2, 4), air, 3);
     }
@@ -258,6 +261,8 @@ public final class ArchiveEvents {
                         for (int x = 77; x <= 85; x++) for (int z = 0; z <= 8; z++)
                             for (int y = 0; y <= 4; y++) level.setBlock(origin.offset(x, y, z), air, 3);
                         var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
+                        level.setBlock(origin.offset(74, 1, 4), concrete, 3);
+                        level.setBlock(origin.offset(74, 2, 4), concrete, 3);
                         level.setBlock(origin.offset(76, 1, 4), concrete, 3);
                         level.setBlock(origin.offset(76, 2, 4), concrete, 3);
                     }
@@ -598,7 +603,7 @@ public final class ArchiveEvents {
                 observerMessage = "OBSERVER // A shape waits behind you. When you turn, it is farther down the corridor.";
             } else {
                 observerPos = origin.offset(48, 1, 4);
-                observerMessage = "OBSERVER // A figure stands behind the Records glass. The room is empty when you reach it.";
+                observerMessage = "OBSERVER // A figure stands beside the Records terminal. The room is empty when you reach it.";
             }
             if (player.level() instanceof ServerLevel serverLevel) {
                 serverLevel.sendParticles(ParticleTypes.SMOKE, observerPos.getX() + 0.5,
@@ -707,7 +712,9 @@ public final class ArchiveEvents {
                 data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
         // The final tape permanently rewrites the Rift Chamber.
         for (int y = 1; y <= 3; y++) {
-            level.setBlock(origin.offset(74, y, 4), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
+            level.setBlock(origin.offset(74, y, 4), data.getBoolean("nullarchive_room_zero") && y <= 2
+                    ? net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
+                    : ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
             level.setBlock(origin.offset(74, y, 5), ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
         }
         for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
