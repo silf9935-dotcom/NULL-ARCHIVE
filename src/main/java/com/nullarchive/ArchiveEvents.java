@@ -478,24 +478,24 @@ public final class ArchiveEvents {
         int phase = data.getInt(PHASE_KEY);
         if (phase < 2) return;
         long now = player.level().getGameTime();
-        if (now < data.getLong("nullarchive_ambient_cooldown")) return;
+        boolean ambientReady = now >= data.getLong("nullarchive_ambient_cooldown");
         BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
                 data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
         BlockPos pos = player.blockPosition();
         String key = null, message = null;
         float pitch = 0.7F;
-        if (phase >= 2 && !data.getBoolean("nullarchive_ambient_obs") && pos.distSqr(origin.offset(15, 1, 4)) <= 16) {
+        if (ambientReady && phase >= 2 && !data.getBoolean("nullarchive_ambient_obs") && pos.distSqr(origin.offset(15, 1, 4)) <= 16) {
             key = "nullarchive_ambient_obs"; message = "OBSERVATION // The glass shows you standing here. You are not standing here."; pitch = 0.55F;
-        } else if (phase >= 3 && !data.getBoolean("nullarchive_ambient_corrupt") && pos.distSqr(origin.offset(26, 1, 4)) <= 16) {
+        } else if (ambientReady && phase >= 3 && !data.getBoolean("nullarchive_ambient_corrupt") && pos.distSqr(origin.offset(26, 1, 4)) <= 16) {
             key = "nullarchive_ambient_corrupt"; message = "BASEMENT // The floor is breathing. The recorder insists this is ventilation."; pitch = 0.65F;
-        } else if (phase >= 4 && !data.getBoolean("nullarchive_ambient_static") && pos.distSqr(origin.offset(37, 1, 4)) <= 16) {
+        } else if (ambientReady && phase >= 4 && !data.getBoolean("nullarchive_ambient_static") && pos.distSqr(origin.offset(37, 1, 4)) <= 16) {
             key = "nullarchive_ambient_static"; message = "INCIDENT LAB // A voice from the wall says: 'You already opened the door.'"; pitch = 0.45F;
-        } else if (phase >= 4 && !data.getBoolean("nullarchive_ambient_gate") && pos.distSqr(origin.offset(65, 1, 4)) <= 25) {
+        } else if (ambientReady && phase >= 4 && !data.getBoolean("nullarchive_ambient_gate") && pos.distSqr(origin.offset(65, 1, 4)) <= 25) {
             key = "nullarchive_ambient_gate"; message = "SEALED WING // Access requires authorization. Something on the other side is counting."; pitch = 0.5F;
-        } else if (phase >= 5 && !data.getBoolean("nullarchive_ambient_rift") && pos.distSqr(origin.offset(70, 1, 4)) <= 16) {
+        } else if (ambientReady && phase >= 5 && !data.getBoolean("nullarchive_ambient_rift") && pos.distSqr(origin.offset(70, 1, 4)) <= 16) {
             key = "nullarchive_ambient_rift"; message = "BREACH // The transmission is coming from your inventory."; pitch = 0.35F;
         }
-        if (key == null && phase >= 3 && !data.getBoolean("nullarchive_presence_" + phase)
+        if (ambientReady && key == null && phase >= 3 && !data.getBoolean("nullarchive_presence_" + phase)
                 && pos.distSqr(origin.offset(32, 1, 4)) <= 900) {
             // A sound is placed behind the player, creating a stalking cue without a fake entity.
             float yaw = player.getYRot() * ((float) Math.PI / 180F);
