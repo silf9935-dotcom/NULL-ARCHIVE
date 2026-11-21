@@ -132,6 +132,7 @@ public final class ArchiveEvents {
                     data.remove(EVIDENCE_KEY);
                     data.remove(EVIDENCE_FLAGS_KEY);
                     data.remove(ANOMALY_KEY);
+                    data.remove("nullarchive_anomaly_cooldown");
                     data.remove("nullarchive_ending_complete");
                     data.remove("nullarchive_door_unlocked");
                     data.remove("nullarchive_rift_scan");
