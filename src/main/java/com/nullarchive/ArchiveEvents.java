@@ -150,7 +150,7 @@ public final class ArchiveEvents {
             int flags = data.getInt(EVIDENCE_FLAGS_KEY);
             if (flags == 0) flags = (1 << Math.min(data.getInt(EVIDENCE_KEY), 5)) - 1;
             player.displayClientMessage(Component.literal("FIELD JOURNAL // NULL ARCHIVE"), false);
-            player.displayClientMessage(Component.literal("Recordings: " + phase + "/6 // Unique clues: " + evidenceCount(data) + "/8 // Instability: " + data.getInt(INSTABILITY_KEY) + "% // Breaches: " + data.getInt(BREACH_COUNT_KEY)), false);
+            player.displayClientMessage(Component.literal("Recordings: " + phase + "/6 // Unique clues: " + evidenceCount(data) + "/8 // Instability: " + data.getInt(INSTABILITY_KEY) + "% // Breaches: " + data.getInt(BREACH_COUNT_KEY) + " // Observer encounters " + data.getInt("nullarchive_observer_count")), false);
             player.displayClientMessage(Component.literal((phase >= 1 ? "[RECORDED]" : "[LOCKED]") + " 01 — Evidence Tape"), false);
             player.displayClientMessage(Component.literal((phase >= 2 ? "[RECORDED]" : "[LOCKED]") + " 02 — Basement"), false);
             player.displayClientMessage(Component.literal((phase >= 3 ? "[RECORDED]" : "[LOCKED]") + " 03 — Observation"), false);
@@ -221,7 +221,7 @@ public final class ArchiveEvents {
                     playerData.remove("nullarchive_ambient_gate");
                     playerData.remove("nullarchive_ambient_rift");
                     playerData.remove("nullarchive_ambient_cooldown");
-                    playerData.remove("nullarchive_random_anomaly_cooldown");
+                    playerData.remove("nullarchive_random_anomaly_cooldown");\n                    playerData.remove("nullarchive_observer_cooldown");\n                    playerData.remove("nullarchive_observer_count");\n                    for (int observerPhase = 3; observerPhase <= 6; observerPhase++) playerData.remove("nullarchive_observer_" + observerPhase);
                     for (int phaseIndex = 0; phaseIndex <= 6; phaseIndex++) {
                         playerData.remove("nullarchive_presence_" + phaseIndex);
                         playerData.remove("nullarchive_inscription_" + phaseIndex);
@@ -499,6 +499,39 @@ public final class ArchiveEvents {
             data.putLong("nullarchive_ambient_cooldown", now + 100);
             player.displayClientMessage(Component.literal("SIGNAL // Footsteps behind you. The corridor is empty."), false);
             return;
+        }
+        // The Observer is a phase-gated encounter, represented by a short particle silhouette rather than a fake mob.
+        if (phase >= 3 && phase <= 6 && !data.getBoolean("nullarchive_observer_" + phase)
+                && now >= data.getLong("nullarchive_observer_cooldown")
+                && pos.getX() >= origin.getX() && pos.getX() <= origin.getX() + 76
+                && pos.getZ() >= origin.getZ() && pos.getZ() <= origin.getZ() + 8
+                && player.getRandom().nextInt(900) == 0) {
+            BlockPos observerPos;
+            String observerMessage;
+            if (phase >= 6) {
+                observerPos = origin.offset(70, 1, 4);
+                observerMessage = "OBSERVER // The silhouette is standing inside the Rift Frame. It has your outline.";
+            } else if (phase >= 5) {
+                float yaw = player.getYRot() * ((float) Math.PI / 180F);
+                observerPos = pos.offset((int) Math.round(Math.sin(yaw) * 6), 0,
+                        (int) Math.round(Math.cos(yaw) * 6));
+                observerMessage = "OBSERVER // A shape waits behind you. When you turn, it is farther down the corridor.";
+            } else {
+                observerPos = origin.offset(48, 1, 4);
+                observerMessage = "OBSERVER // A figure stands behind the Records glass. The room is empty when you reach it.";
+            }
+            if (player.level() instanceof ServerLevel serverLevel) {
+                serverLevel.sendParticles(ParticleTypes.SMOKE, observerPos.getX() + 0.5,
+                        observerPos.getY() + 1.0, observerPos.getZ() + 0.5, 18, 0.25, 0.8, 0.25, 0.01);
+                serverLevel.sendParticles(ParticleTypes.PORTAL, observerPos.getX() + 0.5,
+                        observerPos.getY() + 1.0, observerPos.getZ() + 0.5, 12, 0.35, 0.9, 0.35, 0.2);
+            }
+            player.level().playSound(null, observerPos, ModSounds.SIGNAL_DISTORTION.get(),
+                    SoundSource.AMBIENT, 0.65F, 0.35F + phase * 0.08F);
+            data.putBoolean("nullarchive_observer_" + phase, true);
+            data.putLong("nullarchive_observer_cooldown", now + 900);
+            data.putInt("nullarchive_observer_count", data.getInt("nullarchive_observer_count") + 1);
+            player.displayClientMessage(Component.literal(observerMessage), false);
         }
         // Rare, unscheduled micro-anomalies can occur during any facility visit.
         // Unscheduled, low-frequency micro-anomalies make revisits less predictable.
