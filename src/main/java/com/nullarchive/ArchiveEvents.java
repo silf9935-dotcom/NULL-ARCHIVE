@@ -199,6 +199,7 @@ public final class ArchiveEvents {
                     data.remove(ANOMALY_KEY);
                     data.remove("nullarchive_anomaly_cooldown");
                     data.remove("nullarchive_emf_cooldown");
+                    data.remove("nullarchive_shard_cooldown");
                     data.remove("nullarchive_ending_complete");
                     data.remove("nullarchive_door_unlocked");
                     data.remove("nullarchive_rift_scan");
@@ -825,12 +826,20 @@ public final class ArchiveEvents {
     public static void onNullShardUse(PlayerInteractEvent.RightClickItem event) {
         if (event.getLevel().isClientSide() || !event.getItemStack().is(ModItems.NULL_SHARD.get())) return;
         CompoundTag data = event.getEntity().getPersistentData();
+        long now = event.getLevel().getGameTime();
+        if (now < data.getLong("nullarchive_shard_cooldown")) {
+            event.getEntity().displayClientMessage(Component.literal("NULL SHARD // The resonance is fading. Wait before testing it again."), false);
+            return;
+        }
+        data.putLong("nullarchive_shard_cooldown", now + 20);
         int phase = data.getInt(PHASE_KEY);
         int evidence = evidenceCount(data);
         String response = phase < 4
                 ? "NULL SHARD // Cold. It refuses to resonate before the incident."
                 : evidence < 3
                 ? "NULL SHARD // It vibrates toward missing evidence."
+                : phase < 6
+                ? "NULL SHARD // A pulse travels down the corridor. It stops at a door that is already open."
                 : "NULL SHARD // The shard is silent. Something nearby is listening.";
         event.getEntity().displayClientMessage(Component.literal(response), false);
         event.getLevel().playSound(null, event.getEntity().blockPosition(),
