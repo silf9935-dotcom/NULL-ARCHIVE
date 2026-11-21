@@ -327,6 +327,15 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_ambient_rift");
                     data.remove("nullarchive_ambient_cooldown");
                     data.remove("nullarchive_random_anomaly_cooldown");
+                    data.remove("nullarchive_observer_cooldown");
+                    data.remove("nullarchive_observer_count");
+                    data.remove("nullarchive_observer_stage");
+                    data.remove("nullarchive_observer_next");
+                    data.remove("nullarchive_observer_x");
+                    data.remove("nullarchive_observer_y");
+                    data.remove("nullarchive_observer_z");
+                    for (int observerPhase = 3; observerPhase <= 6; observerPhase++)
+                        data.remove("nullarchive_observer_" + observerPhase);
                     data.remove("nullarchive_last_stalking_cue");
                     data.remove("nullarchive_stalking_cue_cooldown");
                     data.remove("nullarchive_ending_seal_feedback");
