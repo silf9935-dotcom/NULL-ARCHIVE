@@ -88,6 +88,9 @@ public final class ArchiveEvents {
             player.displayClientMessage(Component.literal("ENDING // " + (phase >= 6 && evidenceCount(data) >= 5
                     ? "Requirements met. Locate the Rift Frame and use the Rift Key."
                     : "Requires all 6 recordings and 5 distinct clues.")), false);
+            player.displayClientMessage(Component.literal("ACCESS // Sealed Door: "
+                    + (data.getBoolean("nullarchive_door_unlocked") ? "UNLOCKED" : "LOCKED")
+                    + " // Rift scan: " + (data.getBoolean("nullarchive_rift_scan") ? "RECORDED" : "NOT RECORDED")), false);
             String nextStep;
             if (data.getBoolean("nullarchive_ending_complete")) nextStep = "COMPLETE // The Rift is sealed. The archive has no further instructions.";
             else if (phase == 0) nextStep = "NEXT // Use the Field Recorder to begin the Intake recording.";
