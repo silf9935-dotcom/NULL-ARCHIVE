@@ -685,6 +685,12 @@ public final class ArchiveEvents {
             event.getEntity().displayClientMessage(Component.literal("ANOMALY // Dormant. Complete the first recording."), false);
             return;
         }
+        long now = event.getLevel().getGameTime();
+        if (now < data.getLong("nullarchive_anomaly_cooldown")) {
+            event.getEntity().displayClientMessage(Component.literal("ANOMALY // The surface is silent. Give the signal time to settle."), false);
+            return;
+        }
+        data.putLong("nullarchive_anomaly_cooldown", now + 40);
         int anomaly = Math.min(data.getInt(ANOMALY_KEY) + 1, 3);
         data.putInt(ANOMALY_KEY, anomaly);
         String message = switch (anomaly) {
