@@ -68,7 +68,7 @@ public final class WorldAnomalyEvents {
                 player.displayClientMessage(Component.literal("ANOMALY // Something stood between the trees. You blinked. It was gone."), true);
             }
             case 3 -> {
-                level.playSound(null, player.blockPosition(), SoundEvents.RESPAWN_ANCHOR_DEPLETE,
+                level.playSound(null, player.blockPosition(), SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(),
                         SoundSource.AMBIENT, 0.22F, 0.55F);
                 player.displayClientMessage(Component.literal("ARCHIVE // Your world has been recorded."), true);
             }
