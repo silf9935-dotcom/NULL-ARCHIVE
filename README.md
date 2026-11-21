@@ -6,7 +6,7 @@ A psychological-horror / ARG Minecraft mod for **Minecraft 1.21.1**, **Minecraft
 
 ## Development status
 
-**Playable mechanics prototype — not a release build.** The mod currently has a six-stage field recorder progression, persistent player investigation data, eight distinct clue types, a command-built seven-room facility, a text field journal, a directional EMF scanner, anomaly interactions, phase-gated access, and a conditional ending. Core mechanics are implemented server-side, but gameplay/build verification has not been completed in this environment.
+**Playable mechanics prototype — not a release build.** The mod currently has a six-stage field recorder progression, persistent player investigation data, eight distinct clue types, a command-built seven-room facility, a text field journal, a directional EMF scanner, anomaly interactions, phase-gated access, and a conditional ending. Core mechanics are implemented server-side. The GitHub Actions pipeline compiles the mod with Java 21 and ForgeGradle; each successful run publishes the built JAR as a downloadable workflow artifact. In-game balance and multiplayer playtesting are still required.
 
 Not yet implemented: automatic world generation, custom textures/models beyond placeholders, a graphical journal, a cinematic ending, and a polished audio/visual experience.
 
@@ -24,7 +24,7 @@ Run from the project root:
 gradle build
 ```
 
-The distributable JAR should be written to `build/libs/`. Build success is not currently verified; please report compiler or runtime errors as issues.
+The distributable JAR should be written to `build/libs/`. The repository CI runs `gradle build --no-daemon` on every push and pull request. Successful runs upload `build/libs/*.jar` as a 30-day artifact; open the [Actions page](https://github.com/silf9935-dotcom/NULL-ARCHIVE/actions), select the latest successful Build run, and download `null-archive-<commit-sha>`.
 
 ## Quick start
 
@@ -38,7 +38,7 @@ The distributable JAR should be written to `build/libs/`. Build success is not c
 Admin commands:
 - `/nullarchive generate` — create the seven-room test facility at your location.
 - `/nullarchive status` — show your current progression and ending state.
-- `/nullarchive reset` — reset player investigation progress and event triggers. World blocks are not restored.
+- `/nullarchive reset` — reset player investigation progress and event triggers, including Observer state. The generated facility remains in the world; only documented door/ending/Room 0 structures are restored.
 - `/archivejournal` — player-accessible investigation journal.
 
 ## Prototype mechanics
