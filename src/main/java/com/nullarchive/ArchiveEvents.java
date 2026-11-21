@@ -566,15 +566,24 @@ public final class ArchiveEvents {
         if (block.equals(ModBlocks.SEALED_DOOR.get())) {
             if (phase < 4) {
                 event.getEntity().displayClientMessage(Component.literal("SEALED ACCESS // Lock status: RED. Incident authorization missing."), false);
+                event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(),
+                        SoundSource.BLOCKS, 0.45F, 0.35F);
             } else if (evidence < 3) {
                 event.getEntity().displayClientMessage(Component.literal("SEALED ACCESS // Three indexed clues required for access."), false);
+                event.getLevel().playSound(null, event.getPos(), ModSounds.TAPE_CLICK.get(),
+                        SoundSource.BLOCKS, 0.4F, 0.5F);
             } else if (!data.getBoolean("nullarchive_door_unlocked")
                     && !event.getItemStack().is(ModItems.ARCHIVE_KEY.get())) {
                 event.getEntity().displayClientMessage(Component.literal("SEALED ACCESS // The lock accepts an Archive Key."), false);
+                event.getLevel().playSound(null, event.getPos(), ModSounds.TAPE_CLICK.get(),
+                        SoundSource.BLOCKS, 0.5F, 0.35F);
             } else {
-                if (!data.getBoolean("nullarchive_door_unlocked")) {
+                boolean firstUnlock = !data.getBoolean("nullarchive_door_unlocked");
+                if (firstUnlock) {
                     data.putBoolean("nullarchive_door_unlocked", true);
                     if (!event.getEntity().getAbilities().instabuild) event.getItemStack().shrink(1);
+                    event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(),
+                            SoundSource.BLOCKS, 0.8F, 0.45F);
                 }
                 var state = event.getLevel().getBlockState(event.getPos());
                 boolean opening = !state.getValue(ArchiveDoorBlock.OPEN);
