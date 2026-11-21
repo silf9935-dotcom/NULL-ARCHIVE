@@ -501,7 +501,7 @@ public final class ArchiveEvents {
             // A sound is placed behind the player, creating a stalking cue without a fake entity.
             float yaw = player.getYRot() * ((float) Math.PI / 180F);
             BlockPos behind = pos.offset((int) Math.round(Math.sin(yaw) * 4),
-                    0, (int) Math.round(Math.cos(yaw) * 4));
+                    0, (int) Math.round(-Math.cos(yaw) * 4));
             player.level().playSound(null, behind, SoundEvents.AMETHYST_BLOCK_CHIME,
                     SoundSource.AMBIENT, 0.45F, 0.45F + phase * 0.06F);
             data.putBoolean("nullarchive_presence_" + phase, true);
@@ -560,7 +560,9 @@ public final class ArchiveEvents {
                 data.putInt("nullarchive_observer_stage", 2);
                 data.putLong("nullarchive_observer_next", now + 35);
             } else if (observerStage == 2) {
-                BlockPos closePos = pos.offset(0, 0, 2);
+                float yaw = player.getYRot() * ((float) Math.PI / 180F);
+                BlockPos closePos = pos.offset((int) Math.round(-Math.sin(yaw) * 2), 0,
+                        (int) Math.round(Math.cos(yaw) * 2));
                 player.level().playSound(null, closePos, ModSounds.SIGNAL_DISTORTION.get(),
                         SoundSource.AMBIENT, 0.5F, 0.3F);
                 if (player.level() instanceof ServerLevel serverLevel)
@@ -592,7 +594,7 @@ public final class ArchiveEvents {
             } else if (phase >= 5) {
                 float yaw = player.getYRot() * ((float) Math.PI / 180F);
                 observerPos = pos.offset((int) Math.round(Math.sin(yaw) * 6), 0,
-                        (int) Math.round(Math.cos(yaw) * 6));
+                        (int) Math.round(-Math.cos(yaw) * 6));
                 observerMessage = "OBSERVER // A shape waits behind you. When you turn, it is farther down the corridor.";
             } else {
                 observerPos = origin.offset(48, 1, 4);
