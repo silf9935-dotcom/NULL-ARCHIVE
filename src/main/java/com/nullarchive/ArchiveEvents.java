@@ -781,7 +781,8 @@ public final class ArchiveEvents {
                 "INTAKE // Visitor log interference.", "OBSERVATION // Reflection signal.",
                 "BASEMENT // Organic pulse beneath the floor.", "INCIDENT LAB // Static in the walls.",
                 "RECORDS // A concealed index is nearby.", "SEALED WING // Lock resonance.",
-                "RIFT // Displaced frame signal.", "NULL // The final recording is rewriting this room."
+                "RIFT // Displaced frame signal.", "NULL // The final recording is rewriting this room.",
+                "ROOM 0 // An unlisted chamber is resonating beyond the Rift."
         };
         int[] gates = {1, 2, 3, 4, 4, 4, 5, 6};
         int bestIndex = -1;
@@ -794,23 +795,21 @@ public final class ArchiveEvents {
                 bestIndex = i;
             }
         }
-        if (bestIndex < 0) {
-            player.displayClientMessage(Component.literal("EMF // Signal below threshold. Advance the recordings or move deeper into the facility."), false);
-            event.getLevel().playSound(null, player.blockPosition(), ModSounds.ARCHIVE_PULSE.get(),
-                    SoundSource.PLAYERS, 0.5F, 0.9F);
-            return;
-        }
         BlockPos scanOrigin = player.blockPosition();
-        BlockPos scanTarget = targets[bestIndex];
-        // Detect actual anomalous blocks as well as authored landmarks, so mutations remain discoverable.
+        BlockPos scanTarget = bestIndex >= 0 ? targets[bestIndex] : scanOrigin;
+        // Search nearby world mutations even when no authored landmark is in range.
+        // Otherwise a signal in an altered corridor could be missed by the early landmark gate.
         if (phase >= 2) {
+            BlockPos roomZeroCore = origin.offset(81, 1, 4);
             for (int dx = -8; dx <= 8; dx++) for (int dy = -8; dy <= 8; dy++) for (int dz = -8; dz <= 8; dz++) {
                 BlockPos scanPos = scanOrigin.offset(dx, dy, dz);
                 double distance = scanOrigin.distSqr(scanPos);
                 if (distance > 64 || distance >= bestDistance) continue;
                 var scannedBlock = event.getLevel().getBlockState(scanPos).getBlock();
                 if (scannedBlock.equals(ModBlocks.NULL_BLOCK.get())) {
-                    bestDistance = distance; bestIndex = 7; scanTarget = scanPos;
+                    bestDistance = distance;
+                    bestIndex = data.getBoolean("nullarchive_room_zero") && scanPos.equals(roomZeroCore) ? 8 : 7;
+                    scanTarget = scanPos;
                 } else if (scannedBlock.equals(ModBlocks.STATIC_BLOCK.get())) {
                     bestDistance = distance; bestIndex = 3; scanTarget = scanPos;
                 } else if (scannedBlock.equals(ModBlocks.CORRUPTED_STONE.get())) {
@@ -819,6 +818,12 @@ public final class ArchiveEvents {
                     bestDistance = distance; bestIndex = 1; scanTarget = scanPos;
                 }
             }
+        }
+        if (bestIndex < 0) {
+            player.displayClientMessage(Component.literal("EMF // Signal below threshold. Advance the recordings or move deeper into the facility."), false);
+            event.getLevel().playSound(null, player.blockPosition(), ModSounds.ARCHIVE_PULSE.get(),
+                    SoundSource.PLAYERS, 0.5F, 0.9F);
+            return;
         }
         int strength = bestDistance <= 4 ? 5 : bestDistance <= 9 ? 4 : bestDistance <= 16 ? 3 : bestDistance <= 36 ? 2 : 1;
         BlockPos target = scanTarget;
