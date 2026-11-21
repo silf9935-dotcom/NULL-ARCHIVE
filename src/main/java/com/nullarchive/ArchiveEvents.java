@@ -544,12 +544,18 @@ public final class ArchiveEvents {
             BlockPos echoPos = new BlockPos(data.getInt("nullarchive_observer_x"),
                     data.getInt("nullarchive_observer_y"), data.getInt("nullarchive_observer_z"));
             if (observerStage == 1) {
-                player.level().playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME,
-                        SoundSource.AMBIENT, 0.35F, 0.35F);
-                player.displayClientMessage(Component.literal("OBSERVER // It moved. The sound is closer than the silhouette was."), false);
-                if (player.level() instanceof ServerLevel serverLevel)
+                float yaw = player.getYRot() * ((float) Math.PI / 180F);
+                BlockPos falseSignal = pos.offset((int) Math.round(Math.cos(yaw) * 5), 0,
+                        (int) Math.round(-Math.sin(yaw) * 5));
+                player.level().playSound(null, falseSignal, SoundEvents.AMETHYST_BLOCK_CHIME,
+                        SoundSource.AMBIENT, 0.4F, 0.42F);
+                player.displayClientMessage(Component.literal("OBSERVER // A second signal answers from the side. The silhouette has not moved."), false);
+                if (player.level() instanceof ServerLevel serverLevel) {
                     serverLevel.sendParticles(ParticleTypes.SMOKE, echoPos.getX() + 0.5, echoPos.getY() + 1.0,
                             echoPos.getZ() + 0.5, 8, 0.2, 0.6, 0.2, 0.01);
+                    serverLevel.sendParticles(ParticleTypes.PORTAL, falseSignal.getX() + 0.5,
+                            falseSignal.getY() + 1.0, falseSignal.getZ() + 0.5, 5, 0.2, 0.4, 0.2, 0.08);
+                }
                 data.putInt("nullarchive_observer_stage", 2);
                 data.putLong("nullarchive_observer_next", now + 35);
             } else if (observerStage == 2) {
