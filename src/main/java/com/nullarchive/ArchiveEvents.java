@@ -89,7 +89,8 @@ public final class ArchiveEvents {
                     ? "Requirements met. Locate the Rift Frame and use the Rift Key."
                     : "Requires all 6 recordings and 5 distinct clues.")), false);
             String nextStep;
-            if (phase == 0) nextStep = "NEXT // Use the Field Recorder to begin the Intake recording.";
+            if (data.getBoolean("nullarchive_ending_complete")) nextStep = "COMPLETE // The Rift is sealed. The archive has no further instructions.";
+            else if (phase == 0) nextStep = "NEXT // Use the Field Recorder to begin the Intake recording.";
             else if (phase == 1) nextStep = "NEXT // Inspect the Intake log and Archive Tile. Catalogue two distinct items, then play tape 2.";
             else if (phase == 2) nextStep = "NEXT // Inspect Observation Glass and query the Memory Block with a Terminal Cartridge. Find two clues to unlock tape 3.";
             else if (phase == 3) nextStep = "NEXT // Search anomaly blocks and room inscriptions. Gather three clues and locate the Archive Key before tape 4.";
