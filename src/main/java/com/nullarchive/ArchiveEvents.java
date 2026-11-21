@@ -421,7 +421,15 @@ public final class ArchiveEvents {
         event.getLevel().playSound(null, event.getEntity().blockPosition(),
                 ModSounds.TAPE_CLICK.get(), SoundSource.PLAYERS, 0.8F, 0.85F + phase * 0.04F);
         data.putInt(PHASE_KEY, phase + 1);
-        if (phase + 1 == 6) triggerFinalArchiveShift(event.getEntity());
+        if (phase + 1 < 6) {
+            event.getEntity().displayClientMessage(Component.literal("PLAYBACK // Recording accepted. Archive phase " + (phase + 2)
+                    + " is now available. Use /archivejournal to review your next objective."), false);
+            if (phase >= 2) event.getLevel().playSound(null, event.getEntity().blockPosition(),
+                    ModSounds.ARCHIVE_PULSE.get(), SoundSource.PLAYERS, 0.6F, 0.7F + phase * 0.08F);
+        } else {
+            event.getEntity().displayClientMessage(Component.literal("PLAYBACK // Final recording accepted. The facility is no longer stable."), false);
+            triggerFinalArchiveShift(event.getEntity());
+        }
         NullArchive.LOGGER.info("Archive phase {} recorded for {}", phase + 1,
                 event.getEntity().getGameProfile().getName());
     }
