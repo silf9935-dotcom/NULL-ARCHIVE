@@ -597,6 +597,11 @@ public final class ArchiveEvents {
                 } else {
                     data.putBoolean("nullarchive_ending_complete", true);
                     if (!event.getEntity().getAbilities().instabuild) held.shrink(1);
+                    // Make the ending visible in the world: the frame seals into glass,
+                    // with a final null fragment left above the threshold.
+                    event.getLevel().setBlock(event.getPos(), ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
+                    event.getLevel().setBlock(event.getPos().above(), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
+                    event.getLevel().setBlock(event.getPos().below(), ModBlocks.CORRUPTED_STONE.get().defaultBlockState(), 3);
                     event.getEntity().displayClientMessage(Component.literal(
                             "ENDING // The key turns without touching the lock. The rift folds inward. On the other side, someone finishes your sentence. ARCHIVE CLOSED."), false);
                     event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(),
