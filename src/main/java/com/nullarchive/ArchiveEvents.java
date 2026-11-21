@@ -596,11 +596,11 @@ public final class ArchiveEvents {
                 if (phase < 2 || evidence < 2) {
                     event.getEntity().displayClientMessage(Component.literal("TERMINAL // Cartridge rejected. Two recordings and two indexed clues required."), false);
                 } else {
-                    if (!event.getEntity().getAbilities().instabuild) held.shrink(1);
                     boolean firstQuery = catalogueEvidence(data, TERMINAL_FLAG);
+                    if (firstQuery && !event.getEntity().getAbilities().instabuild) held.shrink(1);
                     event.getEntity().displayClientMessage(Component.literal(firstQuery
                             ? "TERMINAL QUERY // /SUBJECT/NULL/EXIT_LOG.txt // EVIDENCE 06 recorded. The subject field is blank."
-                            : "TERMINAL QUERY // /SUBJECT/NULL/EXIT_LOG.txt // The file timestamp is tomorrow."), false);
+                            : "TERMINAL QUERY // /SUBJECT/NULL/EXIT_LOG.txt // The file timestamp is tomorrow. Duplicate queries do not consume cartridges."), false);
                     event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.8F, 0.55F);
                 }
             } else {
