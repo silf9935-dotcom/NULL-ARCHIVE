@@ -10,6 +10,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -60,6 +61,51 @@ public final class ArchiveEvents {
             "TAPE 06 // NULL: The final recording is dated tomorrow. It says: DO NOT LEAVE."
     };
 
+    private static final String INSTABILITY_KEY = "nullarchive_instability";
+    private static final String BREACH_COUNT_KEY = "nullarchive_breach_count";
+    private static final String BREACH_COOLDOWN_KEY = "nullarchive_breach_cooldown";
+    private static final String LAST_BREACH_KEY = "nullarchive_last_breach";
+
+    private static void increaseInstability(Player player, int amount, String source) {
+        CompoundTag data = player.getPersistentData();
+        int oldValue = data.getInt(INSTABILITY_KEY);
+        int value = Math.min(100, oldValue + amount);
+        data.putInt(INSTABILITY_KEY, value);
+        if (amount > 0 && value > oldValue && ((value >= 25 && oldValue < 25)
+                || (value >= 50 && oldValue < 50) || (value >= 75 && oldValue < 75))) {
+            player.displayClientMessage(Component.literal("ARCHIVE INSTABILITY // " + value + "% — " + source), false);
+        }
+        if (value < 100) return;
+        long now = player.level().getGameTime();
+        if (now < data.getLong(BREACH_COOLDOWN_KEY)) {
+            data.putInt(INSTABILITY_KEY, 99);
+            return;
+        }
+
+        String[] events = {
+                "FALSE ROOM // The corridor ahead is longer than the facility blueprint. The door at its end is not there when you approach.",
+                "RECORDING ERROR // Your recorder clicks on. A voice says: “Stop collecting evidence. You are the evidence.”",
+                "SHADOW TRACE // Footsteps cross behind you. A dark pulse moves through the wall, then vanishes.",
+                "MEMORY COLLAPSE // Every inscription nearby seems to have changed. Your journal still remembers the old text."
+        };
+        int previous = data.getInt(LAST_BREACH_KEY);
+        int eventIndex = player.getRandom().nextInt(events.length - 1);
+        if (eventIndex >= previous) eventIndex++;
+        data.putInt(LAST_BREACH_KEY, eventIndex);
+        data.putInt(BREACH_COUNT_KEY, data.getInt(BREACH_COUNT_KEY) + 1);
+        data.putInt(INSTABILITY_KEY, 35);
+        data.putLong(BREACH_COOLDOWN_KEY, now + 1200);
+        player.displayClientMessage(Component.literal("!!! ARCHIVE BREACH // " + events[eventIndex]), false);
+        player.level().playSound(null, player.blockPosition(), ModSounds.SIGNAL_DISTORTION.get(),
+                SoundSource.PLAYERS, 1.0F, 0.25F + eventIndex * 0.12F);
+        if (player.level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(),
+                    36, 0.8, 1.0, 0.8, 0.15);
+            serverLevel.sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY() + 0.8, player.getZ(),
+                    12, 0.4, 0.5, 0.4, 0.02);
+        }
+    }
+
     private ArchiveEvents() {}
 
     @SubscribeEvent
@@ -71,7 +117,7 @@ public final class ArchiveEvents {
             int flags = data.getInt(EVIDENCE_FLAGS_KEY);
             if (flags == 0) flags = (1 << Math.min(data.getInt(EVIDENCE_KEY), 5)) - 1;
             player.displayClientMessage(Component.literal("FIELD JOURNAL // NULL ARCHIVE"), false);
-            player.displayClientMessage(Component.literal("Recordings: " + phase + "/6 // Unique clues: " + evidenceCount(data) + "/8"), false);
+            player.displayClientMessage(Component.literal("Recordings: " + phase + "/6 // Unique clues: " + evidenceCount(data) + "/8 // Instability: " + data.getInt(INSTABILITY_KEY) + "% // Breaches: " + data.getInt(BREACH_COUNT_KEY)), false);
             player.displayClientMessage(Component.literal((phase >= 1 ? "[RECORDED]" : "[LOCKED]") + " 01 — Evidence Tape"), false);
             player.displayClientMessage(Component.literal((phase >= 2 ? "[RECORDED]" : "[LOCKED]") + " 02 — Basement"), false);
             player.displayClientMessage(Component.literal((phase >= 3 ? "[RECORDED]" : "[LOCKED]") + " 03 — Observation"), false);
@@ -114,7 +160,7 @@ public final class ArchiveEvents {
                             + "/6 // Evidence " + evidenceCount(data) + "/8 // Anomaly " + data.getInt(ANOMALY_KEY)
                             + " // Gate " + (data.getBoolean("nullarchive_door_unlocked") ? "UNLOCKED" : "LOCKED")
                             + " // Rift Scan " + (data.getBoolean("nullarchive_rift_scan") ? "RECORDED" : "NOT RECORDED")
-                            + " // Ending " + (data.getBoolean("nullarchive_ending_complete") ? "COMPLETE" : "INCOMPLETE")), false);
+                            + " // Ending " + (data.getBoolean("nullarchive_ending_complete") ? "COMPLETE" : "INCOMPLETE")\n                            + " // Instability " + data.getInt(INSTABILITY_KEY) + "% // Breaches " + data.getInt(BREACH_COUNT_KEY)), false);
                     return 1;
                 }))
                 .then(Commands.literal("generate").executes(context -> {
@@ -220,7 +266,7 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_random_anomaly_cooldown");
                     data.remove("nullarchive_last_stalking_cue");
                     data.remove("nullarchive_stalking_cue_cooldown");
-                    data.remove("nullarchive_ending_seal_feedback");
+                    data.remove("nullarchive_ending_seal_feedback");\n                    data.remove(INSTABILITY_KEY);\n                    data.remove(BREACH_COUNT_KEY);\n                    data.remove(BREACH_COOLDOWN_KEY);\n                    data.remove(LAST_BREACH_KEY);
                     for (int phaseIndex = 0; phaseIndex <= 6; phaseIndex++) {
                         data.remove("nullarchive_presence_" + phaseIndex);
                         data.remove("nullarchive_inscription_" + phaseIndex);
@@ -460,7 +506,7 @@ public final class ArchiveEvents {
         event.getEntity().displayClientMessage(Component.literal(PHASE_MESSAGES[phase]), false);
         event.getLevel().playSound(null, event.getEntity().blockPosition(),
                 ModSounds.TAPE_CLICK.get(), SoundSource.PLAYERS, 0.8F, 0.85F + phase * 0.04F);
-        data.putInt(PHASE_KEY, phase + 1);
+        data.putInt(PHASE_KEY, phase + 1);\n        increaseInstability(event.getEntity(), 5, "Tape playback accepted.");
         if (phase + 1 < 6) {
             event.getEntity().displayClientMessage(Component.literal("PLAYBACK // Recording accepted. Archive phase " + (phase + 2)
                     + " is now available. Use /archivejournal to review your next objective."), false);
@@ -532,7 +578,7 @@ public final class ArchiveEvents {
             player.displayClientMessage(Component.literal("EMF // The receiver is still recalibrating. Wait for the needle to settle."), false);
             return;
         }
-        data.putLong("nullarchive_emf_cooldown", now + 20);
+        data.putLong("nullarchive_emf_cooldown", now + 20);\n        increaseInstability(player, 3, "EMF scan performed.");
         BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
                 data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
         BlockPos[] targets = {
@@ -623,7 +669,7 @@ public final class ArchiveEvents {
             } else {
                 boolean firstUnlock = !data.getBoolean("nullarchive_door_unlocked");
                 if (firstUnlock) {
-                    data.putBoolean("nullarchive_door_unlocked", true);
+                    data.putBoolean("nullarchive_door_unlocked", true);\n                    increaseInstability(event.getEntity(), 10, "Sealed access granted.");
                     if (!event.getEntity().getAbilities().instabuild) event.getItemStack().shrink(1);
                     event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(),
                             SoundSource.BLOCKS, 0.8F, 0.45F);
@@ -697,7 +743,7 @@ public final class ArchiveEvents {
             event.setCanceled(true);
         } else if (block.equals(ModBlocks.RIFT_FRAME.get())) {
             if (phase >= 5 && !data.getBoolean("nullarchive_rift_scan")) {
-                data.putBoolean("nullarchive_rift_scan", true);
+                data.putBoolean("nullarchive_rift_scan", true);\n                increaseInstability(event.getEntity(), 15, "Rift resonance recorded.");
                 event.getEntity().displayClientMessage(Component.literal("RIFT SCAN // Frame resonance detected. The missing segment is not missing; it is displaced. Signal recorded locally, but it is not part of the evidence index."), false);
                 event.getLevel().playSound(null, event.getPos(), ModSounds.SIGNAL_DISTORTION.get(), SoundSource.BLOCKS, 0.8F, 0.45F);
             }
