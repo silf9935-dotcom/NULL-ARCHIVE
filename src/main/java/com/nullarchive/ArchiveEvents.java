@@ -66,6 +66,29 @@ public final class ArchiveEvents {
     private static final String BREACH_COOLDOWN_KEY = "nullarchive_breach_cooldown";
     private static final String LAST_BREACH_KEY = "nullarchive_last_breach";
 
+    private static void openRoomZero(ServerLevel level, BlockPos origin) {
+        var air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+        var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
+        var tile = ModBlocks.ARCHIVE_TILE.get().defaultBlockState();
+        var glass = ModBlocks.BLACK_GLASS.get().defaultBlockState();
+        var nullState = ModBlocks.NULL_BLOCK.get().defaultBlockState();
+        // Room 0 is built beyond the generated Rift Chamber, only after a breach.
+        for (int x = 77; x <= 85; x++) for (int z = 0; z <= 8; z++) {
+            boolean wall = x == 77 || x == 85 || z == 0 || z == 8;
+            level.setBlock(origin.offset(x, 0, z), tile, 3);
+            level.setBlock(origin.offset(x, 4, z), concrete, 3);
+            for (int y = 1; y <= 3; y++) level.setBlock(origin.offset(x, y, z), wall ? glass : air, 3);
+        }
+        // A narrow entrance remains open in the west wall; the rest is sealed.
+        for (int y = 1; y <= 2; y++) level.setBlock(origin.offset(77, y, 4), air, 3);
+        level.setBlock(origin.offset(81, 1, 4), nullState, 3);
+        level.setBlock(origin.offset(81, 0, 4), ModBlocks.CORRUPTED_STONE.get().defaultBlockState(), 3);
+        level.setBlock(origin.offset(81, 2, 4), glass, 3);
+        level.setBlock(origin.offset(81, 3, 4), air, 3);
+        level.setBlock(origin.offset(76, 1, 4), air, 3);
+        level.setBlock(origin.offset(76, 2, 4), air, 3);
+    }
+
     private static void increaseInstability(Player player, int amount, String source) {
         CompoundTag data = player.getPersistentData();
         int oldValue = data.getInt(INSTABILITY_KEY);
@@ -94,6 +117,16 @@ public final class ArchiveEvents {
         data.putInt(LAST_BREACH_KEY, eventIndex);
         data.putInt(BREACH_COUNT_KEY, data.getInt(BREACH_COUNT_KEY) + 1);
         data.putInt(INSTABILITY_KEY, 35);
+        if (data.getBoolean("nullarchive_facility_generated") && !data.getBoolean("nullarchive_room_zero")
+                && data.getInt(PHASE_KEY) >= 4 && player.level() instanceof ServerLevel serverLevel
+                && data.contains("nullarchive_facility_x")
+                && data.getString("nullarchive_facility_dimension").equals(serverLevel.dimension().location().toString())) {
+            BlockPos facilityOrigin = new BlockPos(data.getInt("nullarchive_facility_x"),
+                    data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
+            openRoomZero(serverLevel, facilityOrigin);
+            data.putBoolean("nullarchive_room_zero", true);
+            player.displayClientMessage(Component.literal("ROOM 0 // Facility map updated. A room has been indexed beyond the Rift Chamber. Its number was not on the original plan."), false);
+        }
         data.putLong(BREACH_COOLDOWN_KEY, now + 1200);
         player.displayClientMessage(Component.literal("!!! ARCHIVE BREACH // " + events[eventIndex]), false);
         player.level().playSound(null, player.blockPosition(), ModSounds.SIGNAL_DISTORTION.get(),
@@ -176,7 +209,7 @@ public final class ArchiveEvents {
                     playerData.putInt("nullarchive_facility_x", origin.getX());
                     playerData.putInt("nullarchive_facility_y", origin.getY());
                     playerData.putInt("nullarchive_facility_z", origin.getZ());
-                    playerData.putString("nullarchive_facility_dimension", level.dimension().location().toString());
+                    playerData.putString("nullarchive_facility_dimension", level.dimension().location().toString());\n                    playerData.putBoolean("nullarchive_facility_generated", true);\n                    playerData.remove("nullarchive_room_zero");
                     playerData.remove("nullarchive_ambient_obs");
                     playerData.remove("nullarchive_ambient_corrupt");
                     playerData.remove("nullarchive_ambient_static");
@@ -257,7 +290,7 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_facility_x");
                     data.remove("nullarchive_facility_y");
                     data.remove("nullarchive_facility_z");
-                    data.remove("nullarchive_facility_dimension");
+                    data.remove("nullarchive_facility_dimension");\n                    data.remove("nullarchive_facility_generated");\n                    data.remove("nullarchive_room_zero");
                     data.remove("nullarchive_ambient_obs");
                     data.remove("nullarchive_ambient_corrupt");
                     data.remove("nullarchive_ambient_static");
