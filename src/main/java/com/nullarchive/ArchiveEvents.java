@@ -699,7 +699,8 @@ public final class ArchiveEvents {
             }
             event.setCanceled(true);
         } else if (block.equals(ModBlocks.OBSERVATION_GLASS.get())) {
-            if (phase >= 2 && catalogueEvidence(data, GLASS_FLAG)) {\n                increaseInstability(event.getEntity(), 8, "Observation clue indexed.");
+            if (phase >= 2 && catalogueEvidence(data, GLASS_FLAG)) {
+                increaseInstability(event.getEntity(), 8, "Observation clue indexed.");
                 event.getEntity().displayClientMessage(Component.literal("EVIDENCE 05 // Observation glass recorded. Reflection timing is impossible."), false);
                 event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(), SoundSource.BLOCKS, 0.7F, 0.65F);
             } else if (phase < 2) {
@@ -713,7 +714,8 @@ public final class ArchiveEvents {
                 if (phase < 2 || evidence < 2) {
                     event.getEntity().displayClientMessage(Component.literal("TERMINAL // Cartridge rejected. Two recordings and two indexed clues required."), false);
                 } else {
-                    boolean firstQuery = catalogueEvidence(data, TERMINAL_FLAG);\n                    if (firstQuery) increaseInstability(event.getEntity(), 8, "Terminal clue indexed.");
+                    boolean firstQuery = catalogueEvidence(data, TERMINAL_FLAG);
+                    if (firstQuery) increaseInstability(event.getEntity(), 8, "Terminal clue indexed.");
                     if (firstQuery && !event.getEntity().getAbilities().instabuild) held.shrink(1);
                     event.getEntity().displayClientMessage(Component.literal(firstQuery
                             ? "TERMINAL QUERY // /SUBJECT/NULL/EXIT_LOG.txt // EVIDENCE 06 recorded. The subject field is blank."
@@ -797,7 +799,8 @@ public final class ArchiveEvents {
                             data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z") + 2));
             if (atRecordsSecret && phase >= 4 && evidence >= 2 && !data.getBoolean("nullarchive_hidden_record")) {
                 data.putBoolean("nullarchive_hidden_record", true);
-                boolean first = catalogueEvidence(data, HIDDEN_FLAG);\n                if (first) increaseInstability(event.getEntity(), 8, "Hidden record indexed.");
+                boolean first = catalogueEvidence(data, HIDDEN_FLAG);
+                if (first) increaseInstability(event.getEntity(), 8, "Hidden record indexed.");
                 event.getEntity().displayClientMessage(Component.literal(first
                         ? "HIDDEN RECORD // EVIDENCE 08 indexed. The shelf labels are dates. Every date is your next visit."
                         : "HIDDEN RECORD // The archive has already indexed this note."), false);
