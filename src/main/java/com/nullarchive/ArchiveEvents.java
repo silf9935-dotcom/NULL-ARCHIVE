@@ -90,8 +90,11 @@ public final class ArchiveEvents {
                     : "Requires all 6 recordings and 5 distinct clues.")), false);
             String nextStep;
             if (phase == 0) nextStep = "NEXT // Use the Field Recorder to begin the Intake recording.";
-            else if (phase < 6 && evidenceCount(data) < 2) nextStep = "NEXT // Catalogue distinct evidence items, then replay the recorder.";
-            else if (phase < 6) nextStep = "NEXT // Continue the Field Recorder. Later tapes unlock as the archive accepts clues.";
+            else if (phase == 1) nextStep = "NEXT // Inspect the Intake log and Archive Tile. Catalogue two distinct items, then play tape 2.";
+            else if (phase == 2) nextStep = "NEXT // Inspect Observation Glass and query the Memory Block with a Terminal Cartridge. Find two clues to unlock tape 3.";
+            else if (phase == 3) nextStep = "NEXT // Search anomaly blocks and room inscriptions. Gather three clues and locate the Archive Key before tape 4.";
+            else if (phase == 4) nextStep = "NEXT // Open the Sealed Door with the Archive Key. Search the Records floor for its hidden index.";
+            else if (phase == 5) nextStep = "NEXT // Scan the Rift Frame and finish the final recording. Five unique clues are needed to seal the breach.";
             else if (evidenceCount(data) < 5) nextStep = "NEXT // Find more unique clues. Inspect Observation Glass, Memory Block, Sealed Door, and the hidden Records tile.";
             else nextStep = "NEXT // All conditions met. Take the Rift Key to the Rift Frame.";
             player.displayClientMessage(Component.literal(nextStep), false);
