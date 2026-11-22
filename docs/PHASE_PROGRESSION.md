@@ -40,6 +40,10 @@ The centerpiece Null Block in Room 0 contains Record 000. It can be copied once 
 
 The EMF Reader scans nearby authored signals and mutated anomaly blocks within roughly eight blocks. It can detect a nearby anomaly even when no normal room landmark is in range; after Room 0 opens, its centerpiece receives a dedicated Room 0 reading. The field journal reports whether Room 0 is unopened, open, or already copied.
 
+## Optional Null Shard resonance
+
+The Null Shard can be used on four anomaly block types within the tracked facility: Corrupted Stone (phase 2), Static Block (phase 3), Black Glass (phase 4), and Null Block (phase 4). Each type is indexed once in a separate four-bit player flag; the first successful resonance adds 4 instability but does not catalogue standard evidence or consume the shard. Repeats provide feedback only. The Room 0 centerpiece and completed ending seal retain their dedicated interactions. The journal reports the optional resonance count, and both `/nullarchive reset` and `/nullarchive generate` clear the resonance flags.
+
 ## Replay and authority
 
 - `/archivejournal` shows recording progress, all eight standard clue slots, ending requirements, access states, Room 0 state, and the current next-step hint.
