@@ -66,6 +66,11 @@ public final class ArchiveEvents {
     private static final String BREACH_COOLDOWN_KEY = "nullarchive_breach_cooldown";
     private static final String LAST_BREACH_KEY = "nullarchive_last_breach";
 
+    private static final String SHARD_RESONANCE_KEY = "nullarchive_shard_resonance_flags";
+    private static int shardResonanceCount(CompoundTag data) {
+        return Integer.bitCount(data.getInt(SHARD_RESONANCE_KEY) & 15);
+    }
+
     private static void openRoomZero(ServerLevel level, BlockPos origin) {
         var air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
         var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
@@ -179,6 +184,7 @@ public final class ArchiveEvents {
                     + (data.getBoolean("nullarchive_room_zero_clue") ? "RECORD 000 COPIED"
                     : data.getBoolean("nullarchive_room_zero") ? "OPEN // Unlisted chamber beyond the Rift"
                     : "NOT INDEXED")), false);
+            player.displayClientMessage(Component.literal("SHARD RESONANCE // " + shardResonanceCount(data) + "/4 // Not part of the evidence catalogue."), false);
             String nextStep;
             if (data.getBoolean("nullarchive_ending_complete")) nextStep = "COMPLETE // The Rift is sealed. The archive has no further instructions.";
             else if (phase == 0) nextStep = "NEXT // Use the Field Recorder to begin the Intake recording.";
@@ -206,7 +212,8 @@ public final class ArchiveEvents {
                             + " // Gate " + (data.getBoolean("nullarchive_door_unlocked") ? "UNLOCKED" : "LOCKED")
                             + " // Rift Scan " + (data.getBoolean("nullarchive_rift_scan") ? "RECORDED" : "NOT RECORDED")
                             + " // Ending " + (data.getBoolean("nullarchive_ending_complete") ? "COMPLETE" : "INCOMPLETE")
-                            + " // Instability " + data.getInt(INSTABILITY_KEY) + "% // Breaches " + data.getInt(BREACH_COUNT_KEY)), false);
+                            + " // Instability " + data.getInt(INSTABILITY_KEY) + "% // Breaches " + data.getInt(BREACH_COUNT_KEY)
+                            + " // Shard Resonances " + shardResonanceCount(data) + "/4"), false);
                     return 1;
                 }))
                 .then(Commands.literal("generate").executes(context -> {
@@ -249,6 +256,7 @@ public final class ArchiveEvents {
                     playerData.remove("nullarchive_hidden_record");
                     playerData.remove("nullarchive_door_unlocked");
                     playerData.remove("nullarchive_rift_scan");
+                    playerData.remove(SHARD_RESONANCE_KEY);
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Facility generated. Start in Intake and follow the corridor."), false);
                     return 1;
                 }))
@@ -328,6 +336,7 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_intake_log_reveal");
                     data.remove("nullarchive_room_zero");
                     data.remove("nullarchive_room_zero_clue");
+                    data.remove(SHARD_RESONANCE_KEY);
                     data.remove("nullarchive_ambient_obs");
                     data.remove("nullarchive_ambient_corrupt");
                     data.remove("nullarchive_ambient_static");
@@ -1082,11 +1091,79 @@ public final class ArchiveEvents {
         }
     }
     @SubscribeEvent
+    public static void onShardResonance(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getLevel().isClientSide() || !event.getItemStack().is(ModItems.NULL_SHARD.get())) return;
+        Player player = event.getEntity();
+        CompoundTag data = player.getPersistentData();
+        BlockPos pos = event.getPos();
+        var block = event.getLevel().getBlockState(pos).getBlock();
+
+        int flag;
+        int minimumPhase;
+        String label;
+        String message;
+        if (block.equals(ModBlocks.CORRUPTED_STONE.get())) {
+            flag = 1; minimumPhase = 2; label = "MEMORY FRACTURE";
+            message = "MEMORY // The shard pulls toward a fracture in the recording.";
+        } else if (block.equals(ModBlocks.STATIC_BLOCK.get())) {
+            flag = 2; minimumPhase = 3; label = "STATIC";
+            message = "STATIC // The shard hums in a frequency the recorder cannot reproduce.";
+        } else if (block.equals(ModBlocks.BLACK_GLASS.get())) {
+            flag = 4; minimumPhase = 4; label = "REFLECTION";
+            message = "REFLECTION // The shard appears on the wrong side of the glass.";
+        } else if (block.equals(ModBlocks.NULL_BLOCK.get())) {
+            flag = 8; minimumPhase = 4; label = "NULL";
+            message = "NULL // The shard grows heavier. A second pulse answers from inside.";
+        } else return;
+
+        if (!data.getBoolean("nullarchive_facility_generated")
+                || !data.contains("nullarchive_facility_x")
+                || !data.getString("nullarchive_facility_dimension").equals(player.level().dimension().location().toString())) return;
+        BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
+                data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
+        if (pos.getX() < origin.getX() || pos.getX() > origin.getX() + 85
+                || pos.getY() < origin.getY() || pos.getY() > origin.getY() + 4
+                || pos.getZ() < origin.getZ() || pos.getZ() > origin.getZ() + 8) return;
+
+        // Preserve the dedicated Room 0 record and the completed ending's seal feedback.
+        if (pos.equals(origin.offset(81, 1, 4))
+                || (data.getBoolean("nullarchive_ending_complete")
+                && pos.getX() == origin.getX() + 70 && pos.getZ() == origin.getZ() + 4
+                && pos.getY() >= origin.getY() + 1 && pos.getY() <= origin.getY() + 2)) return;
+
+        event.setCanceled(true);
+        int phase = data.getInt(PHASE_KEY);
+        if (phase < minimumPhase) {
+            player.displayClientMessage(Component.literal("SHARD RESONANCE // Dormant. Required recording: " + minimumPhase + "/6."), false);
+            event.getLevel().playSound(null, pos, ModSounds.TAPE_CLICK.get(), SoundSource.BLOCKS, 0.35F, 0.4F);
+            return;
+        }
+
+        int flags = data.getInt(SHARD_RESONANCE_KEY);
+        if ((flags & flag) != 0) {
+            player.displayClientMessage(Component.literal("SHARD RESONANCE // " + label + " is already indexed. No new signal."), false);
+            return;
+        }
+        data.putInt(SHARD_RESONANCE_KEY, flags | flag);
+        increaseInstability(player, 4, "Shard resonance indexed.");
+        player.displayClientMessage(Component.literal("SHARD RESONANCE // " + message + " " + shardResonanceCount(data)
+                + "/4. This is a resonance record, not evidence."), false);
+        event.getLevel().playSound(null, pos, ModSounds.SIGNAL_DISTORTION.get(),
+                SoundSource.BLOCKS, 0.65F, 0.35F + shardResonanceCount(data) * 0.1F);
+        if (player.level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.PORTAL, pos.getX() + 0.5, pos.getY() + 1.0,
+                    pos.getZ() + 0.5, 10, 0.25, 0.4, 0.25, 0.08);
+        }
+    }
+
+    @SubscribeEvent
     public static void onAnomalyBlockUse(PlayerInteractEvent.RightClickBlock event) {
         if (event.getLevel().isClientSide()) return;
         var block = event.getLevel().getBlockState(event.getPos()).getBlock();
         if (!block.equals(ModBlocks.STATIC_BLOCK.get()) && !block.equals(ModBlocks.NULL_BLOCK.get())
                 && !block.equals(ModBlocks.CORRUPTED_STONE.get())) return;
+        // The shard has its own one-time resonance interaction; do not also escalate the generic anomaly click.
+        if (event.getItemStack().is(ModItems.NULL_SHARD.get())) return;
 
         CompoundTag data = event.getEntity().getPersistentData();
         if (data.getInt(PHASE_KEY) < 2) {
