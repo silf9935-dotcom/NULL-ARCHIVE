@@ -975,15 +975,20 @@ public final class ArchiveEvents {
                     event.getEntity().displayClientMessage(Component.literal(output), false);
                 }
             }
-        } else if (block.equals(ModBlocks.BLACK_GLASS.get())
+        } else if ((block.equals(ModBlocks.BLACK_GLASS.get()) || block.equals(ModBlocks.NULL_BLOCK.get()))
                 && data.getBoolean("nullarchive_ending_complete")
                 && data.contains("nullarchive_facility_x")
-                && event.getPos().equals(new BlockPos(data.getInt("nullarchive_facility_x") + 70,
-                        data.getInt("nullarchive_facility_y") + 1, data.getInt("nullarchive_facility_z") + 4))) {
-            event.getEntity().displayClientMessage(Component.literal(
-                    "ARCHIVE CLOSED // The glass is cold. The seal holds. There is no signal on the other side."), false);
-            event.getLevel().playSound(null, event.getPos(), ModSounds.ARCHIVE_PULSE.get(),
-                    SoundSource.BLOCKS, 0.35F, 0.4F);
+                && event.getPos().getX() == data.getInt("nullarchive_facility_x") + 70
+                && event.getPos().getZ() == data.getInt("nullarchive_facility_z") + 4
+                && event.getPos().getY() >= data.getInt("nullarchive_facility_y") + 1
+                && event.getPos().getY() <= data.getInt("nullarchive_facility_y") + 2) {
+            boolean unstableSeal = block.equals(ModBlocks.NULL_BLOCK.get());
+            event.getEntity().displayClientMessage(Component.literal(unstableSeal
+                    ? "ARCHIVE ERROR // The seal is not a surface. The subject remains outside the record. No signal."
+                    : "ARCHIVE CLOSED // The glass is cold. The seal holds. There is no signal on the other side."), false);
+            event.getLevel().playSound(null, event.getPos(), unstableSeal
+                    ? ModSounds.SIGNAL_DISTORTION.get() : ModSounds.ARCHIVE_PULSE.get(),
+                    SoundSource.BLOCKS, 0.35F, unstableSeal ? 0.2F : 0.4F);
             event.setCanceled(true);
         } else if (block.equals(ModBlocks.RIFT_FRAME.get())) {
             if (phase >= 5 && !data.getBoolean("nullarchive_rift_scan")) {
