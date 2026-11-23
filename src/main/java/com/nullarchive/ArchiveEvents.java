@@ -152,7 +152,12 @@ public final class ArchiveEvents {
     private static void restoreKnownAmbientMutations(ServerLevel level, BlockPos origin, CompoundTag data) {
         var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
         var tile = ModBlocks.ARCHIVE_TILE.get().defaultBlockState();
+        var corrupted = ModBlocks.CORRUPTED_STONE.get().defaultBlockState();
         var air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+        if (data.getBoolean("nullarchive_ambient_corrupt")) {
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+                level.setBlock(origin.offset(26 + dx, 0, 4 + dz), corrupted, 3);
+        }
         if (data.getBoolean("nullarchive_ambient_obs")) {
             level.setBlock(origin.offset(15, 1, 0), concrete, 3);
             level.setBlock(origin.offset(15, 2, 0), concrete, 3);
