@@ -149,6 +149,27 @@ public final class ArchiveEvents {
         }
     }
 
+    private static void restoreKnownAmbientMutations(ServerLevel level, BlockPos origin, CompoundTag data) {
+        var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
+        var tile = ModBlocks.ARCHIVE_TILE.get().defaultBlockState();
+        var air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+        if (data.getBoolean("nullarchive_ambient_obs")) {
+            level.setBlock(origin.offset(15, 1, 0), concrete, 3);
+            level.setBlock(origin.offset(15, 2, 0), concrete, 3);
+        }
+        if (data.getBoolean("nullarchive_ambient_static")) {
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+                level.setBlock(origin.offset(37 + dx, 0, 4 + dz), tile, 3);
+        }
+        if (data.getBoolean("nullarchive_ambient_gate")) {
+            for (int y = 1; y <= 3; y++) level.setBlock(origin.offset(70, y, 0), concrete, 3);
+        }
+        if (data.getBoolean("nullarchive_ambient_rift"))
+            level.setBlock(origin.offset(73, 1, 4), air, 3);
+        // The Basement floor was already Corrupted Stone in the generated baseline;
+        // its ambient mutation does not change any block and needs no restoration.
+    }
+
     private ArchiveEvents() {}
 
     @SubscribeEvent
@@ -290,6 +311,7 @@ public final class ArchiveEvents {
                         ServerLevel level = context.getSource().getLevel();
                         BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
                                 data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
+                        restoreKnownAmbientMutations(level, origin, data);
                         BlockPos doorBase = origin.offset(65, 1, 4);
                         var closedDoor = ModBlocks.SEALED_DOOR.get().defaultBlockState();
                         level.setBlock(doorBase, closedDoor, 3);
