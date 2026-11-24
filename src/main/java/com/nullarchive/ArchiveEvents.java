@@ -152,27 +152,30 @@ public final class ArchiveEvents {
     private static void restoreKnownAmbientMutations(ServerLevel level, BlockPos origin, CompoundTag data) {
         var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
         var tile = ModBlocks.ARCHIVE_TILE.get().defaultBlockState();
-        var corrupted = ModBlocks.CORRUPTED_STONE.get().defaultBlockState();
         var air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
         if (data.getBoolean("nullarchive_ambient_corrupt")) {
-            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
-                level.setBlock(origin.offset(26 + dx, 0, 4 + dz), corrupted, 3);
+            // Observation's generated center divider is Archive Concrete.
+            level.setBlock(origin.offset(26, 2, 4), concrete, 3);
         }
         if (data.getBoolean("nullarchive_ambient_obs")) {
             level.setBlock(origin.offset(15, 1, 0), concrete, 3);
             level.setBlock(origin.offset(15, 2, 0), concrete, 3);
         }
         if (data.getBoolean("nullarchive_ambient_static")) {
+            // The center cell is Archive Concrete in the generated Incident Lab floor.
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
-                level.setBlock(origin.offset(37 + dx, 0, 4 + dz), tile, 3);
+                level.setBlock(origin.offset(37 + dx, 0, 4 + dz), dx == 0 ? concrete : tile, 3);
         }
         if (data.getBoolean("nullarchive_ambient_gate")) {
-            for (int y = 1; y <= 3; y++) level.setBlock(origin.offset(70, y, 0), concrete, 3);
+            // Current false passage is in Sealed Wing. Also clean the old Rift-wall location
+            // used by earlier builds so existing investigations can be reset safely.
+            for (int y = 1; y <= 3; y++) {
+                level.setBlock(origin.offset(59, y, 0), concrete, 3);
+                level.setBlock(origin.offset(70, y, 0), concrete, 3);
+            }
         }
         if (data.getBoolean("nullarchive_ambient_rift"))
             level.setBlock(origin.offset(73, 1, 4), air, 3);
-        // The Basement floor was already Corrupted Stone in the generated baseline;
-        // its ambient mutation does not change any block and needs no restoration.
     }
 
     private ArchiveEvents() {}
@@ -538,13 +541,13 @@ public final class ArchiveEvents {
         String key = null, message = null;
         float pitch = 0.7F;
         if (ambientReady && phase >= 2 && !data.getBoolean("nullarchive_ambient_obs") && pos.distSqr(origin.offset(15, 1, 4)) <= 16) {
-            key = "nullarchive_ambient_obs"; message = "OBSERVATION // The glass shows you standing here. You are not standing here."; pitch = 0.55F;
+            key = "nullarchive_ambient_obs"; message = "BASEMENT // A pane of glass appears in the concrete wall. It reflects a corridor with no ceiling strips."; pitch = 0.55F;
         } else if (ambientReady && phase >= 3 && !data.getBoolean("nullarchive_ambient_corrupt") && pos.distSqr(origin.offset(26, 1, 4)) <= 16) {
-            key = "nullarchive_ambient_corrupt"; message = "BASEMENT // The floor is breathing. The recorder insists this is ventilation."; pitch = 0.65F;
+            key = "nullarchive_ambient_corrupt"; message = "OBSERVATION // The divider has become glass. Your reflection is looking toward a different room."; pitch = 0.65F;
         } else if (ambientReady && phase >= 4 && !data.getBoolean("nullarchive_ambient_static") && pos.distSqr(origin.offset(37, 1, 4)) <= 16) {
             key = "nullarchive_ambient_static"; message = "INCIDENT LAB // A voice from the wall says: 'You already opened the door.'"; pitch = 0.45F;
         } else if (ambientReady && phase >= 4 && !data.getBoolean("nullarchive_ambient_gate") && pos.distSqr(origin.offset(65, 1, 4)) <= 25) {
-            key = "nullarchive_ambient_gate"; message = "SEALED WING // Access requires authorization. Something on the other side is counting."; pitch = 0.5F;
+            key = "nullarchive_ambient_gate"; message = "SEALED WING // A side passage appears behind the shelves. The glass does not show the room you are standing in."; pitch = 0.5F;
         } else if (ambientReady && phase >= 5 && !data.getBoolean("nullarchive_ambient_rift") && pos.distSqr(origin.offset(70, 1, 4)) <= 16) {
             key = "nullarchive_ambient_rift"; message = "BREACH // The transmission is coming from your inventory."; pitch = 0.35F;
         }
@@ -694,17 +697,18 @@ public final class ArchiveEvents {
             player.level().setBlock(wall, ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
             player.level().setBlock(wall.above(), ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
         } else if (key.equals("nullarchive_ambient_corrupt")) {
-            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
-                player.level().setBlock(origin.offset(26 + dx, 0, 4 + dz), ModBlocks.CORRUPTED_STONE.get().defaultBlockState(), 3);
+            // Replace one block of the Observation divider, creating a visible change
+            // without overwriting the room's already-corrupted baseline floor.
+            player.level().setBlock(origin.offset(26, 2, 4), ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
         } else if (key.equals("nullarchive_ambient_static")) {
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
                 player.level().setBlock(origin.offset(37 + dx, 0, 4 + dz), ModBlocks.STATIC_BLOCK.get().defaultBlockState(), 3);
         } else if (key.equals("nullarchive_ambient_gate")) {
             // The sealed wing appears to gain a side passage, but the "opening" is a glass wall.
             for (int y = 1; y <= 3; y++) {
-                player.level().setBlock(origin.offset(70, y, 0), ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
+                player.level().setBlock(origin.offset(59, y, 0), ModBlocks.BLACK_GLASS.get().defaultBlockState(), 3);
             }
-            player.level().setBlock(origin.offset(70, 2, 0), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
+            player.level().setBlock(origin.offset(59, 2, 0), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
         } else if (key.equals("nullarchive_ambient_rift")) {
             player.level().setBlock(origin.offset(73, 1, 4), ModBlocks.NULL_BLOCK.get().defaultBlockState(), 3);
         }
