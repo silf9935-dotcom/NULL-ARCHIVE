@@ -164,7 +164,7 @@ public final class ArchiveEvents {
         if (data.getBoolean("nullarchive_ambient_static")) {
             // The center cell is Archive Concrete in the generated Incident Lab floor.
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
-                level.setBlock(origin.offset(37 + dx, 0, 4 + dz), dx == 0 ? concrete : tile, 3);
+                level.setBlock(origin.offset(37 + dx, 0, 4 + dz), dx == 0 && dz == 0 ? concrete : tile, 3);
         }
         if (data.getBoolean("nullarchive_ambient_gate")) {
             // Current false passage is in Sealed Wing. Also clean the old Rift-wall location
