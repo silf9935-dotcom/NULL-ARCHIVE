@@ -40,6 +40,18 @@ The centerpiece Null Block in Room 0 contains Record 000. It can be copied once 
 
 The EMF Reader scans nearby authored signals and mutated anomaly blocks within roughly eight blocks. It can detect a nearby anomaly even when no normal room landmark is in range; after Room 0 opens, its centerpiece receives a dedicated Room 0 reading. The field journal reports whether Room 0 is unopened, open, or already copied.
 
+## Room-specific ambient mutations
+
+The proximity events are anchored to the room layout rather than changing arbitrary nearby blocks. Each fires once per investigation after its phase gate is reached:
+
+- **Basement (phase 2):** the north-wall pane at origin +15, y +1..2, z 0 becomes Black Glass.
+- **Observation (phase 3):** the center block of the divider at origin +26, y +2, z +4 becomes Black Glass.
+- **Incident Lab (phase 4):** a 3×3 floor patch at origin +36..38, y 0, z +4 becomes Static Blocks.
+- **Sealed Wing (phase 4):** a false passage appears in the north wall at origin +59, y +1..3, z 0, with a Null Block in its center.
+- **Rift Chamber (phase 5):** a Null Block appears beside the frame at origin +73, y +1, z +4.
+
+These mutations are persistent world changes until reset. The /nullarchive reset command restores their generated baseline, including the Incident Lab's original concrete center floor block. For compatibility, reset also clears the former Sealed Wing false-passage position used by older builds.
+
 ## Optional Null Shard resonance
 
 The Null Shard can be used on four anomaly block types within the tracked facility: Corrupted Stone (phase 2), Static Block (phase 3), Black Glass (phase 4), and Null Block (phase 4). Each type is indexed once in a separate four-bit player flag; the first successful resonance adds 4 instability but does not catalogue standard evidence or consume the shard. Repeats provide feedback only. The Room 0 centerpiece and completed ending seal retain their dedicated interactions. The journal reports the optional resonance count, and both `/nullarchive reset` and `/nullarchive generate` clear the resonance flags.
