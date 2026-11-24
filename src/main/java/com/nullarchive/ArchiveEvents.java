@@ -292,6 +292,15 @@ public final class ArchiveEvents {
                 .then(Commands.literal("reset").executes(context -> {
                     Player player = context.getSource().getPlayerOrException();
                     CompoundTag data = player.getPersistentData();
+                    boolean hasTrackedFacility = data.contains("nullarchive_facility_x");
+                    boolean inFacilityDimension = hasTrackedFacility
+                            && data.getString("nullarchive_facility_dimension")
+                            .equals(context.getSource().getLevel().dimension().location().toString());
+                    if (hasTrackedFacility && !inFacilityDimension) {
+                        player.displayClientMessage(Component.literal(
+                                "RESET BLOCKED // Return to the generated facility's dimension first. No progress was changed, so its world mutations can still be restored safely."), false);
+                        return 0;
+                    }
                     // Restore the physical gate and ending-specific Rift mutations for a replay.
                     boolean endingWasComplete = data.getBoolean("nullarchive_ending_complete");
                     // Tape 06 rewrites the chamber before the player necessarily meets the ending requirements.
