@@ -36,7 +36,7 @@ Legacy player data with the earlier evidence counter is migrated when the catalo
 
 Investigation actions increase Archive Instability. At 100%, one of four breach events occurs, pressure returns to 35%, and a 60-second breach cooldown begins. The first breach after phase 4 opens an unlisted chamber beyond the Rift Chamber and creates a passage through its east wall.
 
-The centerpiece Null Block in Room 0 contains Record 000. It can be copied once per player when the investigation has reached phase 4 and instability is at least 35%. This is an optional hidden narrative discovery, not a ninth standard evidence clue.
+The centerpiece Null Block in Room 0 contains Record 000. It can be copied once per player when the investigation has reached phase 4 and instability is at least 35%. This is an optional hidden narrative discovery, not a ninth standard evidence clue. After all six tapes have been recorded and Record 000 copied, using the Field Recorder while physically inside Room 0 plays a separate unlisted afterword once. It does not advance the phase, add evidence, consume the recorder, or increase instability; repeat use only confirms that the track is already copied. The journal reports the playback as locked until tape 6, ready, or complete, and suggests it as an afterword after the standard ending.
 
 The EMF Reader scans nearby authored signals and mutated anomaly blocks within roughly eight blocks. It can detect a nearby anomaly even when no normal room landmark is in range; after Room 0 opens, its centerpiece receives a dedicated Room 0 reading. The field journal reports whether Room 0 is unopened, open, or already copied.
 
@@ -58,8 +58,8 @@ The Null Shard can be used on four anomaly block types within the tracked facili
 
 ## Replay and authority
 
-- `/archivejournal` shows recording progress, all eight standard clue slots, ending requirements, access states, Room 0 state, and the current next-step hint.
-- `/nullarchive status` reports the player's progression, instability, breach count, access state, and ending state (permission level 2).
+- `/archivejournal` shows recording progress, all eight standard clue slots, ending requirements, access states, Room 0 state and optional playback status, and the current next-step/afterword hint.
+- `/nullarchive status` reports the player's progression, instability, breach count, access state, ending state, and Room 0 playback state (permission level 2).
 - `/nullarchive reset` resets player progression and investigation triggers. It retains the generated facility coordinates. If a facility is tracked, the command refuses to reset from another dimension so it cannot discard the information needed to restore world changes. Run it in the facility's dimension to restore the Sealed Door, Room 0 passage, final-tape Rift mutations, and tracked Basement/Observation/Incident Lab/Sealed Wing/Rift ambient mutations to their generated baseline. Arbitrary player edits and unrelated world blocks are not reverted.
 - `/nullarchive generate` builds a new seven-room facility around the command executor and moves them into Intake. It replaces blocks in its footprint and creates new item drops, so rerunning it duplicates drops.
 
