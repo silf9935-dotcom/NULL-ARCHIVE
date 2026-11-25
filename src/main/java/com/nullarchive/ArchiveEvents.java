@@ -226,7 +226,7 @@ public final class ArchiveEvents {
                     : "NOT INDEXED";
             if (data.getBoolean("nullarchive_room_zero_clue"))
                 roomZeroStatus += data.getBoolean("nullarchive_room_zero_playback")
-                        ? " // PLAYBACK COMPLETE" : " // PLAYBACK READY";
+                        ? " // PLAYBACK COMPLETE" : phase >= 6 ? " // PLAYBACK READY" : " // PLAYBACK LOCKED UNTIL TAPE 6";
             player.displayClientMessage(Component.literal("ROOM 0 // " + roomZeroStatus), false);
             player.displayClientMessage(Component.literal("SHARD RESONANCE // " + shardResonanceCount(data) + "/4 // Not part of the evidence catalogue."), false);
             String nextStep;
@@ -264,7 +264,9 @@ public final class ArchiveEvents {
                             + " // Ending " + (data.getBoolean("nullarchive_ending_complete") ? "COMPLETE" : "INCOMPLETE")
                             + " // Instability " + data.getInt(INSTABILITY_KEY) + "% // Breaches " + data.getInt(BREACH_COUNT_KEY)
                             + " // Shard Resonances " + shardResonanceCount(data) + "/4"
-                            + " // Room 0 Playback " + (data.getBoolean("nullarchive_room_zero_playback") ? "COMPLETE" : "NOT PLAYED")), false);
+                            + " // Room 0 Playback " + (data.getBoolean("nullarchive_room_zero_playback") ? "COMPLETE"
+                            : data.getBoolean("nullarchive_room_zero_clue") ? (data.getInt(PHASE_KEY) >= 6 ? "READY" : "LOCKED")
+                            : data.getBoolean("nullarchive_room_zero") ? "RECORD 000 REQUIRED" : "NOT OPEN")), false);
                     return 1;
                 }))
                 .then(Commands.literal("generate").executes(context -> {
