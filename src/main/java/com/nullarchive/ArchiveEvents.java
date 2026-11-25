@@ -71,6 +71,18 @@ public final class ArchiveEvents {
         return Integer.bitCount(data.getInt(SHARD_RESONANCE_KEY) & 15);
     }
 
+    private static boolean isInsideRoomZero(Player player, CompoundTag data) {
+        if (!data.getBoolean("nullarchive_room_zero") || !data.getBoolean("nullarchive_facility_generated")
+                || !data.contains("nullarchive_facility_x")
+                || !data.getString("nullarchive_facility_dimension").equals(player.level().dimension().location().toString())) return false;
+        BlockPos origin = new BlockPos(data.getInt("nullarchive_facility_x"),
+                data.getInt("nullarchive_facility_y"), data.getInt("nullarchive_facility_z"));
+        BlockPos pos = player.blockPosition();
+        return pos.getX() >= origin.getX() + 77 && pos.getX() <= origin.getX() + 85
+                && pos.getY() >= origin.getY() + 1 && pos.getY() <= origin.getY() + 3
+                && pos.getZ() >= origin.getZ() && pos.getZ() <= origin.getZ() + 8;
+    }
+
     private static void openRoomZero(ServerLevel level, BlockPos origin) {
         var air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
         var concrete = ModBlocks.ARCHIVE_CONCRETE.get().defaultBlockState();
@@ -209,10 +221,13 @@ public final class ArchiveEvents {
             player.displayClientMessage(Component.literal("ACCESS // Sealed Door: "
                     + (data.getBoolean("nullarchive_door_unlocked") ? "UNLOCKED" : "LOCKED")
                     + " // Rift scan: " + (data.getBoolean("nullarchive_rift_scan") ? "RECORDED" : "NOT RECORDED")), false);
-            player.displayClientMessage(Component.literal("ROOM 0 // "
-                    + (data.getBoolean("nullarchive_room_zero_clue") ? "RECORD 000 COPIED"
+            String roomZeroStatus = data.getBoolean("nullarchive_room_zero_clue") ? "RECORD 000 COPIED"
                     : data.getBoolean("nullarchive_room_zero") ? "OPEN // Unlisted chamber beyond the Rift"
-                    : "NOT INDEXED")), false);
+                    : "NOT INDEXED";
+            if (data.getBoolean("nullarchive_room_zero_clue"))
+                roomZeroStatus += data.getBoolean("nullarchive_room_zero_playback")
+                        ? " // PLAYBACK COMPLETE" : " // PLAYBACK READY";
+            player.displayClientMessage(Component.literal("ROOM 0 // " + roomZeroStatus), false);
             player.displayClientMessage(Component.literal("SHARD RESONANCE // " + shardResonanceCount(data) + "/4 // Not part of the evidence catalogue."), false);
             String nextStep;
             if (data.getBoolean("nullarchive_ending_complete")) nextStep = "COMPLETE // The Rift is sealed. The archive has no further instructions.";
@@ -224,7 +239,13 @@ public final class ArchiveEvents {
             else if (phase == 5) nextStep = "NEXT // Scan the Rift Frame and finish the final recording. Five unique clues are needed to seal the breach.";
             else if (evidenceCount(data) < 5) nextStep = "NEXT // Find more unique clues. Inspect Observation Glass, Memory Block, Sealed Door, and the hidden Records tile.";
             else nextStep = "NEXT // All conditions met. Take the Rift Key to the Rift Frame.";
-            if (!data.getBoolean("nullarchive_ending_complete") && data.getBoolean("nullarchive_room_zero")
+            if (data.getBoolean("nullarchive_ending_complete") && data.getBoolean("nullarchive_room_zero")
+                    && !data.getBoolean("nullarchive_room_zero_clue"))
+                nextStep = "AFTERWORD // Room 0 remains open. Copy RECORD 000 from its central Null Block.";
+            else if (data.getBoolean("nullarchive_ending_complete") && data.getBoolean("nullarchive_room_zero_clue")
+                    && !data.getBoolean("nullarchive_room_zero_playback"))
+                nextStep = "AFTERWORD // Return to Room 0 and use the Field Recorder inside the chamber for its unlisted playback.";
+            else if (!data.getBoolean("nullarchive_ending_complete") && data.getBoolean("nullarchive_room_zero")
                     && !data.getBoolean("nullarchive_room_zero_clue"))
                 nextStep = "NEXT // Room 0 is open beyond the Rift Chamber. Follow the EMF signal to its central Null Block.";
             player.displayClientMessage(Component.literal(nextStep), false);
@@ -242,7 +263,8 @@ public final class ArchiveEvents {
                             + " // Rift Scan " + (data.getBoolean("nullarchive_rift_scan") ? "RECORDED" : "NOT RECORDED")
                             + " // Ending " + (data.getBoolean("nullarchive_ending_complete") ? "COMPLETE" : "INCOMPLETE")
                             + " // Instability " + data.getInt(INSTABILITY_KEY) + "% // Breaches " + data.getInt(BREACH_COUNT_KEY)
-                            + " // Shard Resonances " + shardResonanceCount(data) + "/4"), false);
+                            + " // Shard Resonances " + shardResonanceCount(data) + "/4"
+                            + " // Room 0 Playback " + (data.getBoolean("nullarchive_room_zero_playback") ? "COMPLETE" : "NOT PLAYED")), false);
                     return 1;
                 }))
                 .then(Commands.literal("generate").executes(context -> {
@@ -261,6 +283,7 @@ public final class ArchiveEvents {
                     playerData.putBoolean("nullarchive_facility_generated", true);
                     playerData.remove("nullarchive_room_zero");
                     playerData.remove("nullarchive_room_zero_clue");
+                    playerData.remove("nullarchive_room_zero_playback");
                     playerData.remove("nullarchive_ambient_obs");
                     playerData.remove("nullarchive_ambient_corrupt");
                     playerData.remove("nullarchive_ambient_static");
@@ -375,6 +398,7 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_intake_log_reveal");
                     data.remove("nullarchive_room_zero");
                     data.remove("nullarchive_room_zero_clue");
+                    data.remove("nullarchive_room_zero_playback");
                     data.remove(SHARD_RESONANCE_KEY);
                     data.remove("nullarchive_ambient_obs");
                     data.remove("nullarchive_ambient_corrupt");
@@ -734,6 +758,31 @@ public final class ArchiveEvents {
         CompoundTag data = event.getEntity().getPersistentData();
         int phase = data.getInt(PHASE_KEY);
         int evidence = evidenceCount(data);
+
+        if (phase >= PHASE_MESSAGES.length && isInsideRoomZero(event.getEntity(), data)) {
+            event.setCanceled(true);
+            if (!data.getBoolean("nullarchive_room_zero_clue")) {
+                event.getEntity().displayClientMessage(Component.literal(
+                        "ROOM 0 PLAYBACK // Copy RECORD 000 from the central Null Block before tuning this recording."), false);
+                return;
+            }
+            if (data.getBoolean("nullarchive_room_zero_playback")) {
+                event.getEntity().displayClientMessage(Component.literal(
+                        "ROOM 0 PLAYBACK // The unlisted track has already been copied. The recorder is silent."), false);
+                return;
+            }
+            data.putBoolean("nullarchive_room_zero_playback", true);
+            BlockPos playbackPos = new BlockPos(data.getInt("nullarchive_facility_x") + 81,
+                    data.getInt("nullarchive_facility_y") + 1, data.getInt("nullarchive_facility_z") + 4);
+            event.getEntity().displayClientMessage(Component.literal(
+                    "ROOM 0 PLAYBACK // UNLISTED TRACK: “You were not brought here to investigate. You were left here to be found.” The recording ends before the voice does."), false);
+            event.getLevel().playSound(null, playbackPos, ModSounds.TAPE_CLICK.get(), SoundSource.PLAYERS, 0.9F, 0.35F);
+            event.getLevel().playSound(null, playbackPos, ModSounds.SIGNAL_DISTORTION.get(), SoundSource.PLAYERS, 0.7F, 0.2F);
+            if (event.getLevel() instanceof ServerLevel serverLevel)
+                serverLevel.sendParticles(ParticleTypes.PORTAL, playbackPos.getX() + 0.5,
+                        playbackPos.getY() + 1.0, playbackPos.getZ() + 0.5, 28, 0.35, 0.55, 0.35, 0.12);
+            return;
+        }
 
         if (phase >= 3 && phase < 5 && evidence < phase - 1) {
             event.getEntity().displayClientMessage(Component.literal(
