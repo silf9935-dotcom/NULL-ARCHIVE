@@ -56,10 +56,14 @@ These mutations are persistent world changes until reset. The /nullarchive reset
 
 The Null Shard can be used on four anomaly block types within the tracked facility: Corrupted Stone (phase 2), Static Block (phase 3), Black Glass (phase 4), and Null Block (phase 4). Each type is indexed once in a separate four-bit player flag; the first successful resonance adds 4 instability but does not catalogue standard evidence or consume the shard. Repeats provide feedback only. The Room 0 centerpiece and completed ending seal retain their dedicated interactions. The journal reports the optional resonance count, and both `/nullarchive reset` and `/nullarchive generate` clear the resonance flags.
 
+## Optional Observer trace capture
+
+The Observer's phase-gated silhouette can be recorded with the Field Recorder while its three-beat encounter is active and the saved position is within twelve blocks. A successful capture ends that encounter, stores one phase bit for phases 3–6, adds 5 Archive Instability, and increments a separate 0–4 optional trace index. The recorder is not consumed, the six-tape sequence does not advance, and these traces are not standard evidence clues. Each phase's encounter can be captured only once; if the Observer disappears or its sequence expires, that phase's capture opportunity is gone for the current investigation. /archivejournal and /nullarchive status report the count. Both reset and facility generation clear the capture flags.
+
 ## Replay and authority
 
-- `/archivejournal` shows recording progress, all eight standard clue slots, ending requirements, access states, Room 0 state and optional playback status, and the current next-step/afterword hint.
-- `/nullarchive status` reports the player's progression, instability, breach count, access state, ending state, and Room 0 playback state (permission level 2).
+- `/archivejournal` shows recording progress, all eight standard clue slots, ending requirements, access states, Room 0 state and optional playback status, Observer Trace capture count, and the current next-step/afterword hint.
+- `/nullarchive status` reports the player's progression, instability, breach count, access state, ending state, Room 0 playback state, and optional Observer Trace captures (permission level 2).
 - `/nullarchive reset` resets player progression and investigation triggers. It retains the generated facility coordinates. If a facility is tracked, the command refuses to reset from another dimension so it cannot discard the information needed to restore world changes. Run it in the facility's dimension to restore the Sealed Door, Room 0 passage, final-tape Rift mutations, and tracked Basement/Observation/Incident Lab/Sealed Wing/Rift ambient mutations to their generated baseline. Arbitrary player edits and unrelated world blocks are not reverted.
 - `/nullarchive generate` builds a new seven-room facility around the command executor and moves them into Intake. It replaces blocks in its footprint and creates new item drops, so rerunning it duplicates drops.
 
