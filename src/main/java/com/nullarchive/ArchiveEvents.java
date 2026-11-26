@@ -67,8 +67,12 @@ public final class ArchiveEvents {
     private static final String LAST_BREACH_KEY = "nullarchive_last_breach";
 
     private static final String SHARD_RESONANCE_KEY = "nullarchive_shard_resonance_flags";
+    private static final String OBSERVER_CAPTURE_KEY = "nullarchive_observer_capture_flags";
     private static int shardResonanceCount(CompoundTag data) {
         return Integer.bitCount(data.getInt(SHARD_RESONANCE_KEY) & 15);
+    }
+    private static int observerCaptureCount(CompoundTag data) {
+        return Integer.bitCount(data.getInt(OBSERVER_CAPTURE_KEY) & 15);
     }
 
     private static boolean isInsideRoomZero(Player player, CompoundTag data) {
@@ -201,7 +205,7 @@ public final class ArchiveEvents {
             int flags = data.getInt(EVIDENCE_FLAGS_KEY);
             if (flags == 0) flags = (1 << Math.min(data.getInt(EVIDENCE_KEY), 5)) - 1;
             player.displayClientMessage(Component.literal("FIELD JOURNAL // NULL ARCHIVE"), false);
-            player.displayClientMessage(Component.literal("Recordings: " + phase + "/6 // Unique clues: " + evidenceCount(data) + "/8 // Instability: " + data.getInt(INSTABILITY_KEY) + "% // Breaches: " + data.getInt(BREACH_COUNT_KEY) + " // Observer encounters " + data.getInt("nullarchive_observer_count")), false);
+            player.displayClientMessage(Component.literal("Recordings: " + phase + "/6 // Unique clues: " + evidenceCount(data) + "/8 // Instability: " + data.getInt(INSTABILITY_KEY) + "% // Breaches: " + data.getInt(BREACH_COUNT_KEY) + " // Observer encounters " + data.getInt("nullarchive_observer_count") + " // Captured traces: " + observerCaptureCount(data) + "/4"), false);
             player.displayClientMessage(Component.literal((phase >= 1 ? "[RECORDED]" : "[LOCKED]") + " 01 — Evidence Tape"), false);
             player.displayClientMessage(Component.literal((phase >= 2 ? "[RECORDED]" : "[LOCKED]") + " 02 — Basement"), false);
             player.displayClientMessage(Component.literal((phase >= 3 ? "[RECORDED]" : "[LOCKED]") + " 03 — Observation"), false);
@@ -229,6 +233,7 @@ public final class ArchiveEvents {
                         ? " // PLAYBACK COMPLETE" : phase >= 6 ? " // PLAYBACK READY" : " // PLAYBACK LOCKED UNTIL TAPE 6";
             player.displayClientMessage(Component.literal("ROOM 0 // " + roomZeroStatus), false);
             player.displayClientMessage(Component.literal("SHARD RESONANCE // " + shardResonanceCount(data) + "/4 // Not part of the evidence catalogue."), false);
+            player.displayClientMessage(Component.literal("OBSERVER TRACE // " + observerCaptureCount(data) + "/4 // Use the Field Recorder while the silhouette is within 12 blocks."), false);
             String nextStep;
             if (data.getBoolean("nullarchive_ending_complete")) nextStep = "COMPLETE // The Rift is sealed. The archive has no further instructions.";
             else if (phase == 0) nextStep = "NEXT // Use the Field Recorder to begin the Intake recording.";
@@ -264,6 +269,7 @@ public final class ArchiveEvents {
                             + " // Ending " + (data.getBoolean("nullarchive_ending_complete") ? "COMPLETE" : "INCOMPLETE")
                             + " // Instability " + data.getInt(INSTABILITY_KEY) + "% // Breaches " + data.getInt(BREACH_COUNT_KEY)
                             + " // Shard Resonances " + shardResonanceCount(data) + "/4"
+                            + " // Observer Traces " + observerCaptureCount(data) + "/4"
                             + " // Room 0 Playback " + (data.getBoolean("nullarchive_room_zero_playback") ? "COMPLETE"
                             : data.getBoolean("nullarchive_room_zero_clue") ? (data.getInt(PHASE_KEY) >= 6 ? "READY" : "LOCKED")
                             : data.getBoolean("nullarchive_room_zero") ? "RECORD 000 REQUIRED" : "NOT OPEN")), false);
@@ -311,6 +317,7 @@ public final class ArchiveEvents {
                     playerData.remove("nullarchive_door_unlocked");
                     playerData.remove("nullarchive_rift_scan");
                     playerData.remove(SHARD_RESONANCE_KEY);
+                    playerData.remove(OBSERVER_CAPTURE_KEY);
                     player.displayClientMessage(Component.literal("NULL ARCHIVE // Facility generated. Start in Intake and follow the corridor."), false);
                     return 1;
                 }))
@@ -402,6 +409,7 @@ public final class ArchiveEvents {
                     data.remove("nullarchive_room_zero_clue");
                     data.remove("nullarchive_room_zero_playback");
                     data.remove(SHARD_RESONANCE_KEY);
+                    data.remove(OBSERVER_CAPTURE_KEY);
                     data.remove("nullarchive_ambient_obs");
                     data.remove("nullarchive_ambient_corrupt");
                     data.remove("nullarchive_ambient_static");
@@ -760,6 +768,47 @@ public final class ArchiveEvents {
         CompoundTag data = event.getEntity().getPersistentData();
         int phase = data.getInt(PHASE_KEY);
         int evidence = evidenceCount(data);
+
+        // Use the Field Recorder while the Observer trace is still nearby to capture it.
+        // This optional index is separate from standard evidence and never advances tape progress.
+        int observerStage = data.getInt("nullarchive_observer_stage");
+        if (observerStage > 0 && phase >= 3 && phase <= 6
+                && data.contains("nullarchive_observer_x")
+                && data.getString("nullarchive_facility_dimension").equals(event.getLevel().dimension().location().toString())) {
+            BlockPos observerPos = new BlockPos(data.getInt("nullarchive_observer_x"),
+                    data.getInt("nullarchive_observer_y"), data.getInt("nullarchive_observer_z"));
+            if (event.getEntity().blockPosition().distSqr(observerPos) <= 144.0) {
+                event.setCanceled(true);
+                int captureBit = 1 << (phase - 3);
+                int capturedFlags = data.getInt(OBSERVER_CAPTURE_KEY);
+                data.remove("nullarchive_observer_stage");
+                data.remove("nullarchive_observer_next");
+                data.remove("nullarchive_observer_x");
+                data.remove("nullarchive_observer_y");
+                data.remove("nullarchive_observer_z");
+                if ((capturedFlags & captureBit) != 0) {
+                    event.getEntity().displayClientMessage(Component.literal(
+                            "OBSERVER TRACE // This phase has already been recorded. The silhouette leaves no second copy."), false);
+                    return;
+                }
+                data.putInt(OBSERVER_CAPTURE_KEY, capturedFlags | captureBit);
+                increaseInstability(event.getEntity(), 5, "Observer trace captured.");
+                event.getEntity().displayClientMessage(Component.literal(
+                        "OBSERVER TRACE // Signal captured. The silhouette is gone from the recording. Optional traces: "
+                                + observerCaptureCount(data) + "/4."), false);
+                event.getLevel().playSound(null, observerPos, ModSounds.TAPE_CLICK.get(),
+                        SoundSource.PLAYERS, 0.85F, 0.38F);
+                event.getLevel().playSound(null, observerPos, ModSounds.SIGNAL_DISTORTION.get(),
+                        SoundSource.PLAYERS, 0.55F, 0.22F);
+                if (event.getLevel() instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(ParticleTypes.PORTAL, observerPos.getX() + 0.5,
+                            observerPos.getY() + 1.0, observerPos.getZ() + 0.5, 22, 0.35, 0.65, 0.35, 0.12);
+                    serverLevel.sendParticles(ParticleTypes.SMOKE, observerPos.getX() + 0.5,
+                            observerPos.getY() + 1.0, observerPos.getZ() + 0.5, 10, 0.2, 0.45, 0.2, 0.01);
+                }
+                return;
+            }
+        }
 
         if (phase >= PHASE_MESSAGES.length && isInsideRoomZero(event.getEntity(), data)) {
             event.setCanceled(true);
