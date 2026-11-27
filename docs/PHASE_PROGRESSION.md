@@ -60,6 +60,17 @@ The Null Shard can be used on four anomaly block types within the tracked facili
 
 The Observer's phase-gated silhouette can be recorded with the Field Recorder while its three-beat encounter is active and the saved position is within twelve blocks. A successful capture ends that encounter, stores one phase bit for phases 3–6, adds 5 Archive Instability, and increments a separate 0–4 optional trace index. The recorder is not consumed, the six-tape sequence does not advance, and these traces are not standard evidence clues. Each phase's encounter can be captured only once; if the Observer disappears or its sequence expires, that phase's capture opportunity is gone for the current investigation. /archivejournal and /nullarchive status report the count. Both reset and facility generation clear the capture flags.
 
+## Overworld field trace capture
+
+The separate Overworld anomaly layer now leaves a short-lived, investigable residue after each ambient event. It runs only in the Overworld; the per-player playtime threshold advances only while the player is there. The first 2,400 Overworld ticks are quiet, after which rare cosmetic events can occur. Each event stores its type, block position, dimension, and a 600-tick expiry in player persistent data.
+
+The investigation uses two existing devices in sequence:
+
+1. Use the EMF Reader within eight blocks of the active residue. It reports a strength reading and rough direction, then marks that event as localized.
+2. While still within eight blocks, use the Field Recorder to preserve the trace. If the player has moved too far away, the recorder asks them to approach; if the 600-tick window expires, the residue is discarded.
+
+A successful capture increments the separate `nullarchive_world_trace_count` total and clears the active signal. It does not consume either device, advance the six facility tapes, add to the eight standard clues, or increase facility instability. The trace total appears in `/archivejournal` and `/nullarchive status`. The legacy `/nullarchive reset` command intentionally leaves this Overworld field log and Overworld playtime untouched.
+
 ## Replay and authority
 
 - `/archivejournal` shows recording progress, all eight standard clue slots, ending requirements, access states, Room 0 state and optional playback status, Observer Trace capture count, and the current next-step/afterword hint.
