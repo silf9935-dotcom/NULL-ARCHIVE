@@ -15,6 +15,7 @@
 - [ ] Custom texture and sound assets
 - [ ] Environmental anomaly controller
 - [x] Sound event registry prototype
+- [x] Initial non-destructive Overworld anomaly schedule with temporary, investigable signal residue
 
 ## Milestone 3 — Evidence and ARG
 - [x] Field recorder with six narrative messages
@@ -22,6 +23,7 @@
 - [x] Phase-gated tape playback
 - [x] Memory terminal interaction
 - [x] EMF reader with phase-sensitive readings
+- [x] Optional Overworld anomaly trace capture using EMF Reader followed by Field Recorder
 - [x] Sealed access and rift monitor interactions
 - [x] Stateful sealed door with phase/evidence gate, collision, and open/close sound
 - [x] Conditional Rift Key ending flag (six tapes + five distinct clues)
