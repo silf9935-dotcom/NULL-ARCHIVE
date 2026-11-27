@@ -205,7 +205,7 @@ public final class ArchiveEvents {
             int flags = data.getInt(EVIDENCE_FLAGS_KEY);
             if (flags == 0) flags = (1 << Math.min(data.getInt(EVIDENCE_KEY), 5)) - 1;
             player.displayClientMessage(Component.literal("FIELD JOURNAL // NULL ARCHIVE"), false);
-            player.displayClientMessage(Component.literal("Recordings: " + phase + "/6 // Unique clues: " + evidenceCount(data) + "/8 // Instability: " + data.getInt(INSTABILITY_KEY) + "% // Breaches: " + data.getInt(BREACH_COUNT_KEY) + " // Observer encounters " + data.getInt("nullarchive_observer_count") + " // Captured traces: " + observerCaptureCount(data) + "/4"), false);
+            player.displayClientMessage(Component.literal("Recordings: " + phase + "/6 // Unique clues: " + evidenceCount(data) + "/8 // Instability: " + data.getInt(INSTABILITY_KEY) + "% // Breaches: " + data.getInt(BREACH_COUNT_KEY) + " // Observer encounters " + data.getInt("nullarchive_observer_count") + " // Captured traces: " + observerCaptureCount(data) + "/4 // World traces: " + data.getInt("nullarchive_world_trace_count")), false);
             player.displayClientMessage(Component.literal((phase >= 1 ? "[RECORDED]" : "[LOCKED]") + " 01 — Evidence Tape"), false);
             player.displayClientMessage(Component.literal((phase >= 2 ? "[RECORDED]" : "[LOCKED]") + " 02 — Basement"), false);
             player.displayClientMessage(Component.literal((phase >= 3 ? "[RECORDED]" : "[LOCKED]") + " 03 — Observation"), false);
@@ -270,6 +270,7 @@ public final class ArchiveEvents {
                             + " // Instability " + data.getInt(INSTABILITY_KEY) + "% // Breaches " + data.getInt(BREACH_COUNT_KEY)
                             + " // Shard Resonances " + shardResonanceCount(data) + "/4"
                             + " // Observer Traces " + observerCaptureCount(data) + "/4"
+                            + " // World Traces " + data.getInt("nullarchive_world_trace_count")
                             + " // Room 0 Playback " + (data.getBoolean("nullarchive_room_zero_playback") ? "COMPLETE"
                             : data.getBoolean("nullarchive_room_zero_clue") ? (data.getInt(PHASE_KEY) >= 6 ? "READY" : "LOCKED")
                             : data.getBoolean("nullarchive_room_zero") ? "RECORD 000 REQUIRED" : "NOT OPEN")), false);
@@ -810,6 +811,44 @@ public final class ArchiveEvents {
             }
         }
 
+        // A world anomaly must first be localized with the EMF Reader, then recorded nearby.
+        if (data.getBoolean("nullarchive_world_signal_active")
+                && data.getBoolean("nullarchive_world_signal_scanned")
+                && data.getString("nullarchive_world_signal_dimension").equals(event.getLevel().dimension().location().toString())) {
+            long now = event.getLevel().getGameTime();
+            if (now < data.getLong("nullarchive_world_signal_expires")) {
+                BlockPos signalPos = new BlockPos(data.getInt("nullarchive_world_signal_x"),
+                        data.getInt("nullarchive_world_signal_y"), data.getInt("nullarchive_world_signal_z"));
+                if (event.getEntity().blockPosition().distSqr(signalPos) > 64.0) {
+                    event.setCanceled(true);
+                    event.getEntity().displayClientMessage(Component.literal(
+                            "WORLD TRACE // Signal localized. Move within eight blocks before recording."), false);
+                    return;
+                }
+                event.setCanceled(true);
+                data.putBoolean("nullarchive_world_signal_active", false);
+                data.putBoolean("nullarchive_world_signal_scanned", false);
+                int traceCount = data.getInt("nullarchive_world_trace_count") + 1;
+                data.putInt("nullarchive_world_trace_count", traceCount);
+                String[] traceNames = {"FOOTSTEP RESIDUE", "IMPOSSIBLE TONE", "VISUAL TRACE",
+                        "ARCHIVE PING", "STATIC FALL"};
+                int traceType = Math.max(0, Math.min(4, data.getInt("nullarchive_world_signal_type")));
+                event.getEntity().displayClientMessage(Component.literal(
+                        "WORLD TRACE // " + traceNames[traceType] + " preserved. Total field traces: " + traceCount
+                                + ". The recording contains a location, not a voice."), false);
+                event.getLevel().playSound(null, signalPos, ModSounds.TAPE_CLICK.get(),
+                        SoundSource.PLAYERS, 0.8F, 0.42F);
+                event.getLevel().playSound(null, signalPos, ModSounds.ARCHIVE_PULSE.get(),
+                        SoundSource.PLAYERS, 0.55F, 0.75F);
+                if (event.getLevel() instanceof ServerLevel serverLevel)
+                    serverLevel.sendParticles(ParticleTypes.PORTAL, signalPos.getX() + 0.5,
+                            signalPos.getY() + 0.8, signalPos.getZ() + 0.5, 14, 0.25, 0.45, 0.25, 0.08);
+                return;
+            }
+            data.putBoolean("nullarchive_world_signal_active", false);
+            data.putBoolean("nullarchive_world_signal_scanned", false);
+        }
+
         if (phase >= PHASE_MESSAGES.length && isInsideRoomZero(event.getEntity(), data)) {
             event.setCanceled(true);
             if (!data.getBoolean("nullarchive_room_zero_clue")) {
@@ -912,9 +951,51 @@ public final class ArchiveEvents {
         Player player = event.getEntity();
         CompoundTag data = player.getPersistentData();
         int phase = data.getInt(PHASE_KEY);
+        boolean worldSignalInDimension = data.getBoolean("nullarchive_world_signal_active")
+                && data.getString("nullarchive_world_signal_dimension").equals(event.getLevel().dimension().location().toString());
+        if (worldSignalInDimension) {
+            long worldNow = event.getLevel().getGameTime();
+            if (worldNow >= data.getLong("nullarchive_world_signal_expires")) {
+                data.putBoolean("nullarchive_world_signal_active", false);
+                data.putBoolean("nullarchive_world_signal_scanned", false);
+            } else {
+                BlockPos worldSignal = new BlockPos(data.getInt("nullarchive_world_signal_x"),
+                        data.getInt("nullarchive_world_signal_y"), data.getInt("nullarchive_world_signal_z"));
+                double worldDistance = player.blockPosition().distSqr(worldSignal);
+                if (worldDistance <= 64.0) {
+                    if (worldNow < data.getLong("nullarchive_world_emf_cooldown")) {
+                        player.displayClientMessage(Component.literal("WORLD EMF // Receiver recalibrating. Hold position until the residue settles."), false);
+                        return;
+                    }
+                    data.putLong("nullarchive_world_emf_cooldown", worldNow + 20);
+                    data.putBoolean("nullarchive_world_signal_scanned", true);
+                    String[] worldLabels = {"Footstep residue", "Impossible tone", "Visual trace",
+                            "Archive ping", "Static fall"};
+                    int worldType = Math.max(0, Math.min(4, data.getInt("nullarchive_world_signal_type")));
+                    int worldStrength = worldDistance <= 4 ? 5 : worldDistance <= 9 ? 4
+                            : worldDistance <= 16 ? 3 : worldDistance <= 36 ? 2 : 1;
+                    String worldDirection = worldSignal.getX() > player.blockPosition().getX() ? "ahead"
+                            : worldSignal.getX() < player.blockPosition().getX() ? "behind"
+                            : worldSignal.getY() > player.blockPosition().getY() ? "above"
+                            : worldSignal.getY() < player.blockPosition().getY() ? "below"
+                            : worldSignal.getZ() > player.blockPosition().getZ() ? "to your right"
+                            : worldSignal.getZ() < player.blockPosition().getZ() ? "to your left" : "underfoot";
+                    player.displayClientMessage(Component.literal("WORLD EMF // " + worldStrength + "/5 // "
+                            + worldLabels[worldType] + " // " + worldDirection
+                            + ". Residue is temporary; use the Field Recorder within eight blocks."), false);
+                    event.getLevel().playSound(null, worldSignal, ModSounds.ARCHIVE_PULSE.get(),
+                            SoundSource.PLAYERS, 0.65F, 0.65F + worldStrength * 0.1F);
+                    return;
+                }
+            }
+        }
         if (!data.contains("nullarchive_facility_x")
                 || !data.getString("nullarchive_facility_dimension").equals(event.getLevel().dimension().location().toString())) {
-            player.displayClientMessage(Component.literal("EMF // Baseline. No archive signal in this dimension."), false);
+            boolean residueWaiting = data.getBoolean("nullarchive_world_signal_active")
+                    && data.getString("nullarchive_world_signal_dimension").equals(event.getLevel().dimension().location().toString());
+            player.displayClientMessage(Component.literal(residueWaiting
+                    ? "WORLD EMF // A residue is active, but beyond eight blocks. Sweep the nearby area."
+                    : "EMF // Baseline. No archive signal in this dimension."), false);
             event.getLevel().playSound(null, player.blockPosition(), ModSounds.ARCHIVE_PULSE.get(),
                     SoundSource.PLAYERS, 0.45F, 1.1F);
             return;
