@@ -1,11 +1,13 @@
 package com.nullarchive;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,9 +28,16 @@ public final class WorldAnomalyEvents {
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide()) return;
         Player player = event.player;
-        if (!(player.level() instanceof ServerLevel level) || player.isSpectator()) return;
+        if (!(player.level() instanceof ServerLevel level) || player.isSpectator()
+                || !level.dimension().equals(Level.OVERWORLD)) return;
 
         var data = player.getPersistentData();
+        if (data.getBoolean("nullarchive_world_signal_active")
+                && level.dimension().location().toString().equals(data.getString("nullarchive_world_signal_dimension"))
+                && level.getGameTime() >= data.getLong("nullarchive_world_signal_expires")) {
+            data.putBoolean("nullarchive_world_signal_active", false);
+            data.putBoolean("nullarchive_world_signal_scanned", false);
+        }
         long played = data.getLong(PLAY_TIME) + 1L;
         data.putLong(PLAY_TIME, played);
 
@@ -48,6 +57,21 @@ public final class WorldAnomalyEvents {
         float yaw = player.getYRot() * ((float) Math.PI / 180.0F);
         Vec3 behind = player.position().add(-Math.sin(yaw) * 5.0, 0.0, Math.cos(yaw) * 5.0);
         Vec3 side = player.position().add(Math.cos(yaw) * 6.0, 0.0, Math.sin(yaw) * 6.0);
+        Vec3 signalPosition = switch (event) {
+            case 0 -> behind;
+            case 1, 2 -> side;
+            default -> player.position();
+        };
+        BlockPos signalBlock = BlockPos.containing(signalPosition.x, signalPosition.y, signalPosition.z);
+        var data = player.getPersistentData();
+        data.putBoolean("nullarchive_world_signal_active", true);
+        data.putBoolean("nullarchive_world_signal_scanned", false);
+        data.putInt("nullarchive_world_signal_x", signalBlock.getX());
+        data.putInt("nullarchive_world_signal_y", signalBlock.getY());
+        data.putInt("nullarchive_world_signal_z", signalBlock.getZ());
+        data.putString("nullarchive_world_signal_dimension", level.dimension().location().toString());
+        data.putLong("nullarchive_world_signal_expires", level.getGameTime() + 600L);
+        data.putInt("nullarchive_world_signal_type", event);
 
         switch (event) {
             case 0 -> {
